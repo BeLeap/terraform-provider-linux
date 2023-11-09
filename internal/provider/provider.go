@@ -6,6 +6,7 @@ package provider
 import (
 	"context"
 	"net"
+	"terraform-provider-linux/internal/lib"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -164,13 +165,17 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
-	resp.DataSourceData = session
-	resp.ResourceData = session
+	resp.DataSourceData = &lib.CustomSsh{
+		Session: session,
+	}
+	resp.ResourceData = &lib.CustomSsh{
+		Session: session,
+	}
 }
 
 func (p *LinuxProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewDummyDataSource,
+		NewUserDataSource,
 	}
 }
 

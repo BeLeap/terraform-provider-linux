@@ -12,5 +12,11 @@ provider "linux" {
   private_key = file("~/.ssh/gpu_id_rsa")
 }
 
-data "linux_dummy" "dummy" {}
+data "linux_user" "user" {
+  username = "changseo-jang"
+}
+
+output "user" {
+  value = data.linux_user.user
+}
 
