@@ -169,7 +169,9 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 }
 
 func (p *LinuxProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return nil
+	return []func() datasource.DataSource{
+		NewDummyDataSource,
+	}
 }
 
 func (p *LinuxProvider) Resources(_ context.Context) []func() resource.Resource {
