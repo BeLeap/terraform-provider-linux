@@ -14,23 +14,23 @@ import (
 )
 
 var (
-	_ datasource.DataSource              = &UserDataSource{}
-	_ datasource.DataSourceWithConfigure = &UserDataSource{}
+	_ datasource.DataSource              = &userDataSource{}
+	_ datasource.DataSourceWithConfigure = &userDataSource{}
 )
 
 func NewUserDataSource() datasource.DataSource {
-	return &UserDataSource{}
+	return &userDataSource{}
 }
 
-type UserDataSource struct {
+type userDataSource struct {
 	session *lib.CustomSsh
 }
 
-func (d *UserDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *userDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_user"
 }
 
-func (d *UserDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"username": schema.StringAttribute{
@@ -46,15 +46,15 @@ func (d *UserDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 	}
 }
 
-type UserDataSourceModel struct {
+type userDataSourceModel struct {
 	Username types.String `tfsdk:"username"`
 	Uid      types.Int64  `tfsdk:"uid"`
 	Gid      types.Int64  `tfsdk:"gid"`
 }
 
-func (d *UserDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	session := d.session
-	var state UserDataSourceModel
+	var state userDataSourceModel
 
 	diags := req.Config.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -113,7 +113,7 @@ func (d *UserDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 }
 
-func (d *UserDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
