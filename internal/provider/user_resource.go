@@ -9,6 +9,10 @@ import (
 
 var _ resource.Resource = &UserResource{}
 
+func NewUserResource() resource.Resource {
+	return &UserResource{}
+}
+
 type UserResource struct{}
 
 func (r *UserResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {

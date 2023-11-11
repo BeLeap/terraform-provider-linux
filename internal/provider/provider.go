@@ -180,5 +180,7 @@ func (p *LinuxProvider) DataSources(_ context.Context) []func() datasource.DataS
 }
 
 func (p *LinuxProvider) Resources(_ context.Context) []func() resource.Resource {
-	return nil
+	return []func() resource.Resource{
+		NewUserResource,
+	}
 }
