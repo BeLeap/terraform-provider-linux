@@ -27,7 +27,7 @@ func (e *CustomSshError) Error() string {
 	return string(b)
 }
 
-func (s *CustomSsh) RunCommand(ctx context.Context, command string) (string, error) {
+func (s *CustomSsh) RunCommand(ctx context.Context, command string) (string, *CustomSshError) {
 	var stdoutBuffer bytes.Buffer
 	var stderrBuffer bytes.Buffer
 	s.Session.Stdout = &stdoutBuffer

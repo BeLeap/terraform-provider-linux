@@ -82,10 +82,10 @@ func (d *UserDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	stdout, err := session.RunCommand(ctx, fmt.Sprintf("getent passwd %s", username))
+	stdout, sshErr := session.RunCommand(ctx, fmt.Sprintf("getent passwd %s", username))
 
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to run command", fmt.Sprint(err.Error()))
+	if sshErr != nil {
+		resp.Diagnostics.AddError(sshErr.RawError.Error(), sshErr.Error())
 		return
 	}
 
