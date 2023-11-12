@@ -5,7 +5,6 @@ package provider
 
 import (
 	"context"
-	"net"
 	"terraform-provider-linux/internal/provider/user"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -14,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"golang.org/x/crypto/ssh"
+	"github.com/melbahja/goph"
 )
 
 // Ensure ScaffoldingProvider satisfies various provider interfaces.
@@ -140,33 +139,24 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
-	key, err := ssh.ParsePrivateKey([]byte(privateKey))
+	auth, err := goph.RawKey(privateKey, "")
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to parse private key", err.Error())
+		resp.Diagnostics.AddAttributeError(
+			path.Root("private_key"),
+			"Failed to create auth info",
+			err.Error(),
+		)
 		return
 	}
 
-	sshClientConfig := &ssh.ClientConfig{
-		User:            username,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Auth: []ssh.AuthMethod{
-			ssh.PublicKeys(key),
-		},
-	}
-	sshClient, err := ssh.Dial("tcp", net.JoinHostPort(host, "22"), sshClientConfig)
+	sshClient, err := goph.New(username, host, auth)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to dial host", err.Error())
+		resp.Diagnostics.AddError("Failed to create client", err.Error())
 		return
 	}
 
-	session, err := sshClient.NewSession()
-	if err != nil {
-		resp.Diagnostics.AddError("Failed to create ssh session", err.Error())
-		return
-	}
-
-	resp.DataSourceData = session
-	resp.ResourceData = session
+	resp.DataSourceData = sshClient
+	resp.ResourceData = sshClient
 }
 
 func (p *LinuxProvider) DataSources(_ context.Context) []func() datasource.DataSource {

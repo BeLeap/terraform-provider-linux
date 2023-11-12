@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"terraform-provider-linux/internal/lib"
-	"terraform-provider-linux/internal/lib/customssh"
+	"terraform-provider-linux/internal/lib/commonssh"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"golang.org/x/crypto/ssh"
+	"github.com/melbahja/goph"
 )
 
 var (
@@ -23,7 +23,7 @@ func NewUserResource() resource.Resource {
 }
 
 type userResource struct {
-	session *ssh.Session
+	session *goph.Client
 }
 
 func (r *userResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -88,7 +88,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		command = command + " " + "--gid" + " " + fmt.Sprintf("%d", plan.Gid.ValueInt64())
 	}
 
-	_, commonError := customssh.RunCommand(linuxCtx, command)
+	_, commonError := commonssh.RunCommand(linuxCtx, command)
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
@@ -150,7 +150,7 @@ func (r *userResource) Configure(_ context.Context, req resource.ConfigureReques
 		return
 	}
 
-	session, ok := req.ProviderData.(*ssh.Session)
+	session, ok := req.ProviderData.(*goph.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",

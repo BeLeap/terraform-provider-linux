@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"golang.org/x/crypto/ssh"
+	"github.com/melbahja/goph"
 )
 
 var (
@@ -21,7 +21,7 @@ func NewUserDataSource() datasource.DataSource {
 }
 
 type userDataSource struct {
-	session *ssh.Session
+	session *goph.Client
 }
 
 func (d *userDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -103,7 +103,7 @@ func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 		return
 	}
 
-	session, ok := req.ProviderData.(*ssh.Session)
+	session, ok := req.ProviderData.(*goph.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",

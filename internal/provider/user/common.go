@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"terraform-provider-linux/internal/lib"
-	"terraform-provider-linux/internal/lib/customssh"
+	"terraform-provider-linux/internal/lib/commonssh"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 )
@@ -24,7 +24,7 @@ func GetUser(linuxCtx lib.LinuxContext, username string) (*LinuxUser, *lib.Commo
 			Diagnostics: diag.Diagnostics{diagnoistic},
 		}
 	}
-	stdout, commonError := customssh.RunCommand(linuxCtx, "getent passwd"+" "+username)
+	stdout, commonError := commonssh.RunCommand(linuxCtx, "getent passwd"+" "+username)
 	if commonError != nil {
 		return nil, commonError
 	}

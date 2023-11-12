@@ -1,7 +1,6 @@
-package customssh
+package commonssh
 
 import (
-	"bytes"
 	"fmt"
 	"terraform-provider-linux/internal/lib"
 
@@ -10,20 +9,15 @@ import (
 )
 
 func RunCommand(linuxCtx lib.LinuxContext, command string) (string, *lib.CommonError) {
-	var stdoutBuffer bytes.Buffer
-	var stderrBuffer bytes.Buffer
-	linuxCtx.SshSession.Stdout = &stdoutBuffer
-	linuxCtx.SshSession.Stderr = &stderrBuffer
-
 	tflog.Info(linuxCtx.Ctx, fmt.Sprintf("Running command \"%s\"", command))
-	err := linuxCtx.SshSession.Run(command)
+	out, err := linuxCtx.SshClient.Run(command)
 	if err != nil {
-		diagnostic := diag.NewErrorDiagnostic(err.Error(), stderrBuffer.String())
+		diagnostic := diag.NewErrorDiagnostic(err.Error(), string(out))
 		return "", &lib.CommonError{
 			Error:       err,
 			Diagnostics: diag.Diagnostics{diagnostic},
 		}
 	}
 
-	return stdoutBuffer.String(), nil
+	return string(out), nil
 }

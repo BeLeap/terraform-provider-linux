@@ -3,17 +3,17 @@ package lib
 import (
 	"context"
 
-	"golang.org/x/crypto/ssh"
+	"github.com/melbahja/goph"
 )
 
 type LinuxContext struct {
-	Ctx        context.Context
-	SshSession *ssh.Session
+	Ctx       context.Context
+	SshClient *goph.Client
 }
 
-func NewLinuxContext(ctx context.Context, sshSession *ssh.Session) LinuxContext {
+func NewLinuxContext(ctx context.Context, sshClient *goph.Client) LinuxContext {
 	return LinuxContext{
-		Ctx:        ctx,
-		SshSession: sshSession,
+		Ctx:       ctx,
+		SshClient: sshClient,
 	}
 }
