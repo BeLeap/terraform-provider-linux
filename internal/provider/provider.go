@@ -7,6 +7,7 @@ import (
 	"context"
 	"net"
 	"terraform-provider-linux/internal/lib"
+	"terraform-provider-linux/internal/provider/user"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -175,12 +176,12 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 func (p *LinuxProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewUserDataSource,
+		user.NewUserDataSource,
 	}
 }
 
 func (p *LinuxProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewUserResource,
+		user.NewUserResource,
 	}
 }
