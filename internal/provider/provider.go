@@ -115,24 +115,24 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	if host == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("host"),
-			"Missing host",
-			"Host is required",
+			"Empty host",
+			"Please specify host",
 		)
 	}
 
 	if username == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("username"),
-			"Missing username",
-			"Username is required",
+			"Empty username",
+			"Please specify username",
 		)
 	}
 
 	if privateKey == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("private_key"),
-			"Missing private_key",
-			"PrivateKey is required",
+			"Empty private_key",
+			"Please specify private key",
 		)
 	}
 
@@ -142,7 +142,7 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 	key, err := ssh.ParsePrivateKey([]byte(privateKey))
 	if err != nil {
-		resp.Diagnostics.AddError("Wrong private_key", "Failed to parse private key")
+		resp.Diagnostics.AddError("Failed to parse private key", err.Error())
 		return
 	}
 
@@ -155,13 +155,13 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 	}
 	sshClient, err := ssh.Dial("tcp", net.JoinHostPort(host, "22"), sshClientConfig)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to dial host", "Failed to dial host")
+		resp.Diagnostics.AddError("Failed to dial host", err.Error())
 		return
 	}
 
 	session, err := sshClient.NewSession()
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create ssh session", "Failed to create ssh session")
+		resp.Diagnostics.AddError("Failed to create ssh session", err.Error())
 		return
 	}
 

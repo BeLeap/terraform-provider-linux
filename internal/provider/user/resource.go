@@ -93,6 +93,24 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
 	}
+
+	user, commonError := GetUser(linuxCtx, plan.Username.ValueString())
+	if commonError != nil {
+		resp.Diagnostics.Append(commonError.Diagnostics...)
+		return
+	}
+	if user != nil {
+		resp.Diagnostics.AddError("Failed to created user.", "User not exists after creation request")
+		return
+	}
+
+	plan.Uid = types.Int64Value(user.Uid)
+	plan.Gid = types.Int64Value(user.Gid)
+	diags = resp.State.Set(linuxCtx.Ctx, plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
