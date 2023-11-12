@@ -99,7 +99,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
 	}
-	if user != nil {
+	if user == nil {
 		resp.Diagnostics.AddError("Failed to created user.", "User not exists after creation request")
 		return
 	}

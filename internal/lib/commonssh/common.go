@@ -10,7 +10,17 @@ import (
 
 func RunCommand(linuxCtx lib.LinuxContext, command string) (string, *lib.CommonError) {
 	tflog.Info(linuxCtx.Ctx, fmt.Sprintf("Running command \"%s\"", command))
-	out, err := linuxCtx.SshClient.Run(command)
+	var out []byte
+	var err error
+	fn := func() lib.Status {
+		err = nil
+		out, err = linuxCtx.SshClient.Run(command)
+		if err != nil {
+			return lib.Failed
+		}
+		return lib.Success
+	}
+	_ = lib.BackoffRetry(fn, 3)
 	if err != nil {
 		diagnostic := diag.NewErrorDiagnostic(err.Error(), string(out))
 		return "", &lib.CommonError{

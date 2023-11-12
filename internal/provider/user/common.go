@@ -24,6 +24,7 @@ func GetUser(linuxCtx lib.LinuxContext, username string) (*LinuxUser, *lib.Commo
 			Diagnostics: diag.Diagnostics{diagnoistic},
 		}
 	}
+
 	stdout, commonError := commonssh.RunCommand(linuxCtx, "getent passwd"+" "+username)
 	if commonError != nil {
 		return nil, commonError
