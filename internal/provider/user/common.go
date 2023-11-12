@@ -25,12 +25,21 @@ func GetUser(linuxCtx lib.LinuxContext, username string) (*LinuxUser, *lib.Commo
 		}
 	}
 
-	stdout, commonError := commonssh.RunCommand(linuxCtx, "getent passwd"+" "+username)
+	errorhandler := func(out []byte, err error) (lib.Status, error) {
+		if err.Error() == "Process exited with status 2" {
+			return lib.Success, nil
+		}
+		return lib.Failed, err
+	}
+	stdout, commonError := commonssh.RunCommand(linuxCtx, "getent passwd"+" "+username, errorhandler)
 	if commonError != nil {
 		return nil, commonError
 	}
 
 	getent := strings.Split(stdout, ":")
+	if len(getent) != 7 {
+		return nil, nil
+	}
 
 	uid, err := strconv.ParseInt(getent[2], 10, 64)
 	if err != nil {

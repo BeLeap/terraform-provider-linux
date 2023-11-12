@@ -87,6 +87,10 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
 	}
+	if user == nil {
+		resp.Diagnostics.AddError("User not found", "Check user exists on server")
+		return
+	}
 
 	state.Uid = types.Int64Value(user.Uid)
 	state.Gid = types.Int64Value(user.Gid)

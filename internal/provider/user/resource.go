@@ -88,7 +88,10 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		command = command + " " + "--gid" + " " + fmt.Sprintf("%d", plan.Gid.ValueInt64())
 	}
 
-	_, commonError := commonssh.RunCommand(linuxCtx, command)
+	_, commonError := commonssh.RunCommand(
+		linuxCtx, command,
+		func(out []byte, err error) (lib.Status, error) { return lib.Failed, err },
+	)
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
@@ -126,6 +129,10 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	user, commonError := GetUser(linuxCtx, state.Username.ValueString())
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
+		return
+	}
+	if user == nil {
+		resp.Diagnostics.AddError("User not found", "This indicates user created with terraform deleted outside")
 		return
 	}
 
