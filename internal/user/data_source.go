@@ -20,7 +20,7 @@ func NewUserDataSource() datasource.DataSource {
 }
 
 type userDataSource struct {
-	session *goph.Client
+	client *goph.Client
 }
 
 func (d *userDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -44,7 +44,7 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 }
 
 func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	linuxCtx := util.NewLinuxContext(ctx, d.session)
+	linuxCtx := util.NewLinuxContext(ctx, d.client)
 
 	var state LinuxUserModel
 
@@ -98,7 +98,7 @@ func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 		return
 	}
 
-	session, ok := req.ProviderData.(*goph.Client)
+	client, ok := req.ProviderData.(*goph.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
@@ -108,5 +108,5 @@ func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 		return
 	}
 
-	d.session = session
+	d.client = client
 }

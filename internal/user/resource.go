@@ -22,7 +22,7 @@ func NewUserResource() resource.Resource {
 }
 
 type userResource struct {
-	session *goph.Client
+	client *goph.Client
 }
 
 func (r *userResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -55,7 +55,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	linuxCtx := util.NewLinuxContext(ctx, r.session)
+	linuxCtx := util.NewLinuxContext(ctx, r.client)
 
 	command := "useradd"
 
@@ -115,7 +115,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 }
 
 func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	linuxCtx := util.NewLinuxContext(ctx, r.session)
+	linuxCtx := util.NewLinuxContext(ctx, r.client)
 
 	var state LinuxUserModel
 	diags := req.State.Get(linuxCtx.Ctx, &state)
@@ -155,7 +155,7 @@ func (r *userResource) Configure(_ context.Context, req resource.ConfigureReques
 		return
 	}
 
-	session, ok := req.ProviderData.(*goph.Client)
+	client, ok := req.ProviderData.(*goph.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
@@ -164,5 +164,5 @@ func (r *userResource) Configure(_ context.Context, req resource.ConfigureReques
 		return
 	}
 
-	r.session = session
+	r.client = client
 }
