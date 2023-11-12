@@ -117,14 +117,14 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 }
 
 func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	linuxCtx := lib.NewLinuxContext(ctx, r.session)
+
 	var state userResourceModel
-	diags := req.State.Get(ctx, &state)
+	diags := req.State.Get(linuxCtx.Ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	linuxCtx := lib.NewLinuxContext(ctx, r.session)
 
 	user, commonError := GetUser(linuxCtx, state.Username.ValueString())
 	if commonError != nil {

@@ -51,13 +51,12 @@ type userDataSourceModel struct {
 }
 
 func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	session := d.session
+	linuxCtx := lib.NewLinuxContext(ctx, d.session)
+
 	var state userDataSourceModel
 
-	diags := req.Config.Get(ctx, &state)
+	diags := req.Config.Get(linuxCtx.Ctx, &state)
 	resp.Diagnostics.Append(diags...)
-
-	linuxCtx := lib.NewLinuxContext(ctx, session)
 
 	if state.Username.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
