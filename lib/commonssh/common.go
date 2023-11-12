@@ -2,7 +2,7 @@ package commonssh
 
 import (
 	"fmt"
-	"terraform-provider-linux/internal/lib"
+	"terraform-provider-linux/lib"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"

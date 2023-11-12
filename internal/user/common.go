@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"terraform-provider-linux/internal/lib"
-	"terraform-provider-linux/internal/lib/commonssh"
+	"terraform-provider-linux/lib"
+	"terraform-provider-linux/lib/commonssh"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"

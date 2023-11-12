@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	"terraform-provider-linux/internal/lib"
+	"terraform-provider-linux/lib"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"

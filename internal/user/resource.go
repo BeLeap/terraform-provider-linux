@@ -3,8 +3,8 @@ package user
 import (
 	"context"
 	"fmt"
-	"terraform-provider-linux/internal/lib"
-	"terraform-provider-linux/internal/lib/commonssh"
+	"terraform-provider-linux/lib"
+	"terraform-provider-linux/lib/commonssh"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
