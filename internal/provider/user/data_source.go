@@ -57,10 +57,12 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	var state userDataSourceModel
 
 	diags := req.Config.Get(ctx, &state)
-	resp.Diagnostics.Append(diags...)
+
+	linuxCtx := lib.NewLinuxContext(ctx, session, resp.Diagnostics)
+	linuxCtx.Diagnostics.Append(diags...)
 
 	if state.Username.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
+		linuxCtx.Diagnostics.AddAttributeError(
 			path.Root("username"),
 			"Username unknown",
 			"Username unknown",
@@ -74,7 +76,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 
 	if username == "" {
-		resp.Diagnostics.AddAttributeError(
+		linuxCtx.Diagnostics.AddAttributeError(
 			path.Root("username"),
 			"Missing username",
 			"Missing username",
@@ -82,10 +84,9 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	stdout, sshErr := session.RunCommand(ctx, fmt.Sprintf("getent passwd %s", username))
+	stdout, err := session.RunCommand(linuxCtx, fmt.Sprintf("getent passwd %s", username))
 
-	if sshErr != nil {
-		resp.Diagnostics.AddError(sshErr.RawError.Error(), sshErr.Error())
+	if err != nil || linuxCtx.Diagnostics.HasError() {
 		return
 	}
 
@@ -93,13 +94,13 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	uid, err := strconv.ParseInt(getent[2], 10, 64)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to parse getent uid", fmt.Sprint(err.Error()))
+		linuxCtx.Diagnostics.AddError("Failed to parse getent uid", fmt.Sprint(err.Error()))
 		return
 	}
 
 	gid, err := strconv.ParseInt(getent[3], 10, 64)
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to parse getent gid", fmt.Sprint(err.Error()))
+		linuxCtx.Diagnostics.AddError("Failed to parse getent gid", fmt.Sprint(err.Error()))
 		return
 	}
 
@@ -107,8 +108,8 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	state.Gid = types.Int64Value(gid)
 
 	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
+	linuxCtx.Diagnostics.Append(diags...)
+	if linuxCtx.Diagnostics.HasError() {
 		return
 	}
 }
