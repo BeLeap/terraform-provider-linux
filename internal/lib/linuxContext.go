@@ -3,19 +3,17 @@ package lib
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"golang.org/x/crypto/ssh"
 )
 
 type LinuxContext struct {
-	Ctx         context.Context
-	Ssh         *CustomSsh
-	Diagnostics diag.Diagnostics
+	Ctx        context.Context
+	SshSession *ssh.Session
 }
 
-func NewLinuxContext(ctx context.Context, ssh *CustomSsh, diagnostics diag.Diagnostics) *LinuxContext {
-	return &LinuxContext{
-		Ctx:         ctx,
-		Ssh:         ssh,
-		Diagnostics: diagnostics,
+func NewLinuxContext(ctx context.Context, sshSession *ssh.Session) LinuxContext {
+	return LinuxContext{
+		Ctx:        ctx,
+		SshSession: sshSession,
 	}
 }

@@ -2,15 +2,13 @@ package user
 
 import (
 	"context"
-	"fmt"
-	"strconv"
-	"strings"
 	"terraform-provider-linux/internal/lib"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"golang.org/x/crypto/ssh"
 )
 
 var (
@@ -23,7 +21,7 @@ func NewUserDataSource() datasource.DataSource {
 }
 
 type userDataSource struct {
-	session *lib.CustomSsh
+	session *ssh.Session
 }
 
 func (d *userDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -57,12 +55,12 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	var state userDataSourceModel
 
 	diags := req.Config.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
 
-	linuxCtx := lib.NewLinuxContext(ctx, session, resp.Diagnostics)
-	linuxCtx.Diagnostics.Append(diags...)
+	linuxCtx := lib.NewLinuxContext(ctx, session)
 
 	if state.Username.IsUnknown() {
-		linuxCtx.Diagnostics.AddAttributeError(
+		resp.Diagnostics.AddAttributeError(
 			path.Root("username"),
 			"Username unknown",
 			"Username unknown",
@@ -76,7 +74,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 
 	if username == "" {
-		linuxCtx.Diagnostics.AddAttributeError(
+		resp.Diagnostics.AddAttributeError(
 			path.Root("username"),
 			"Missing username",
 			"Missing username",
@@ -84,32 +82,18 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	stdout, err := session.RunCommand(linuxCtx, fmt.Sprintf("getent passwd %s", username))
-
-	if err != nil || linuxCtx.Diagnostics.HasError() {
+	user, commonError := GetUser(linuxCtx, username)
+	if commonError != nil {
+		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
 	}
 
-	getent := strings.Split(stdout, ":")
-
-	uid, err := strconv.ParseInt(getent[2], 10, 64)
-	if err != nil {
-		linuxCtx.Diagnostics.AddError("Failed to parse getent uid", fmt.Sprint(err.Error()))
-		return
-	}
-
-	gid, err := strconv.ParseInt(getent[3], 10, 64)
-	if err != nil {
-		linuxCtx.Diagnostics.AddError("Failed to parse getent gid", fmt.Sprint(err.Error()))
-		return
-	}
-
-	state.Uid = types.Int64Value(uid)
-	state.Gid = types.Int64Value(gid)
+	state.Uid = types.Int64Value(user.Uid)
+	state.Gid = types.Int64Value(user.Gid)
 
 	diags = resp.State.Set(ctx, &state)
-	linuxCtx.Diagnostics.Append(diags...)
-	if linuxCtx.Diagnostics.HasError() {
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 }
@@ -119,7 +103,7 @@ func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 		return
 	}
 
-	session, ok := req.ProviderData.(*lib.CustomSsh)
+	session, ok := req.ProviderData.(*ssh.Session)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
