@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/melbahja/goph"
 )
 
@@ -49,7 +48,7 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 }
 
 func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan userResourceModel
+	var plan LinuxUserModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -107,8 +106,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	plan.Uid = types.Int64Value(user.Uid)
-	plan.Gid = types.Int64Value(user.Gid)
+	plan = NewLinuxUserModel(user)
 	diags = resp.State.Set(linuxCtx.Ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -119,7 +117,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	linuxCtx := lib.NewLinuxContext(ctx, r.session)
 
-	var state userResourceModel
+	var state LinuxUserModel
 	diags := req.State.Get(linuxCtx.Ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -137,8 +135,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	state.Uid = types.Int64Value(user.Uid)
-	state.Gid = types.Int64Value(user.Gid)
+	state = NewLinuxUserModel(user)
 
 	diags = resp.State.Set(linuxCtx.Ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -168,10 +165,4 @@ func (r *userResource) Configure(_ context.Context, req resource.ConfigureReques
 	}
 
 	r.session = session
-}
-
-type userResourceModel struct {
-	Username types.String `tfsdk:"username"`
-	Uid      types.Int64  `tfsdk:"uid"`
-	Gid      types.Int64  `tfsdk:"gid"`
 }

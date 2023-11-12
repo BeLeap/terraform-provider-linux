@@ -8,6 +8,7 @@ import (
 	"terraform-provider-linux/internal/lib/commonssh"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type LinuxUser struct {
@@ -60,7 +61,22 @@ func GetUser(linuxCtx lib.LinuxContext, username string) (*LinuxUser, *lib.Commo
 	}
 
 	return &LinuxUser{
-		Uid: uid,
-		Gid: gid,
+		Username: username,
+		Uid:      uid,
+		Gid:      gid,
 	}, nil
+}
+
+type LinuxUserModel struct {
+	Username types.String `tfsdk:"username"`
+	Uid      types.Int64  `tfsdk:"uid"`
+	Gid      types.Int64  `tfsdk:"gid"`
+}
+
+func NewLinuxUserModel(user *LinuxUser) LinuxUserModel {
+	return LinuxUserModel{
+		Username: types.StringValue(user.Username),
+		Uid:      types.Int64Value(user.Uid),
+		Gid:      types.Int64Value(user.Gid),
+	}
 }

@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/melbahja/goph"
 )
 
@@ -44,16 +43,10 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 	}
 }
 
-type userDataSourceModel struct {
-	Username types.String `tfsdk:"username"`
-	Uid      types.Int64  `tfsdk:"uid"`
-	Gid      types.Int64  `tfsdk:"gid"`
-}
-
 func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	linuxCtx := lib.NewLinuxContext(ctx, d.session)
 
-	var state userDataSourceModel
+	var state LinuxUserModel
 
 	diags := req.Config.Get(linuxCtx.Ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -91,8 +84,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	state.Uid = types.Int64Value(user.Uid)
-	state.Gid = types.Int64Value(user.Gid)
+	state = NewLinuxUserModel(user)
 
 	diags = resp.State.Set(linuxCtx.Ctx, &state)
 	resp.Diagnostics.Append(diags...)
