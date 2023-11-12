@@ -91,7 +91,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	state.Uid = types.Int64Value(user.Uid)
 	state.Gid = types.Int64Value(user.Gid)
 
-	diags = resp.State.Set(ctx, &state)
+	diags = resp.State.Set(linuxCtx.Ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

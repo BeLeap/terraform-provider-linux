@@ -102,6 +102,23 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	linuxCtx := lib.NewLinuxContext(ctx, r.session)
+
+	user, commonError := GetUser(linuxCtx, state.Username.ValueString())
+	if commonError != nil {
+		resp.Diagnostics.Append(commonError.Diagnostics...)
+		return
+	}
+
+	state.Uid = types.Int64Value(user.Uid)
+	state.Gid = types.Int64Value(user.Gid)
+
+	diags = resp.State.Set(linuxCtx.Ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
