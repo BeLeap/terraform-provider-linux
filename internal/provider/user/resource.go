@@ -132,6 +132,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 	if user == nil {
+		// TODO: Find way to update resource if user deleted outside
 		resp.Diagnostics.AddError("User not found", "This indicates user created with terraform deleted outside")
 		return
 	}
