@@ -8,7 +8,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
+func defaultErrorHandler(out []byte, err error) (util.Status, error) { return util.Failed, err }
+
 func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]byte, error) (util.Status, error)) (string, *util.CommonError) {
+	errorHandlerCoerced := errorhandler
+	if errorHandlerCoerced == nil {
+		errorHandlerCoerced = defaultErrorHandler
+	}
+
 	tflog.Info(linuxCtx.Ctx, fmt.Sprintf("Running command \"%s\"", command))
 	var out []byte
 	var errors []error
@@ -18,7 +25,7 @@ func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]
 		var err error
 		out, err = linuxCtx.SshClient.Run(command)
 		if err != nil {
-			status, err := errorhandler(out, err)
+			status, err := errorHandlerCoerced(out, err)
 			if err != nil {
 				errors = append(errors, err)
 			}

@@ -59,7 +59,6 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	command := "useradd"
 
-	var username string
 	if plan.Username.IsUnknown() || plan.Username.IsNull() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("username"),
@@ -68,7 +67,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		)
 		return
 	}
-	username = plan.Username.ValueString()
+	username := plan.Username.ValueString()
 	if username == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("username"),
@@ -87,10 +86,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		command = command + " " + "--gid" + " " + fmt.Sprintf("%d", plan.Gid.ValueInt64())
 	}
 
-	_, commonError := sshUtil.RunCommand(
-		linuxCtx, command,
-		func(out []byte, err error) (util.Status, error) { return util.Failed, err },
-	)
+	_, commonError := sshUtil.RunCommand(linuxCtx, command, nil)
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
@@ -145,6 +141,65 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 }
 
 func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	linuxCtx := util.NewLinuxContext(ctx, r.client)
+
+	var plan LinuxUserModel
+	diags := req.Plan.Get(linuxCtx.Ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	command := "usermod"
+
+	if plan.Username.IsUnknown() || plan.Username.IsNull() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("username"),
+			"Something wrong in username",
+			"Something wrong in username",
+		)
+		return
+	}
+	username := plan.Username.ValueString()
+	if username == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("username"),
+			"Empty username is not allowed",
+			"Empty username is not allowed",
+		)
+		return
+	}
+
+	command = command + " " + username
+	if !plan.Uid.IsUnknown() && !plan.Uid.IsNull() {
+		command = command + " " + "--uid" + " " + fmt.Sprintf("%d", plan.Uid.ValueInt64())
+	}
+	if !plan.Gid.IsUnknown() && !plan.Uid.IsNull() {
+		command = command + " " + "--gid" + " " + fmt.Sprintf("%d", plan.Gid.ValueInt64())
+	}
+
+	_, commonError := sshUtil.RunCommand(linuxCtx, command, nil)
+	if commonError != nil {
+		resp.Diagnostics.Append(commonError.Diagnostics...)
+		return
+	}
+
+	user, commonError := GetUser(linuxCtx, plan.Username.ValueString())
+	if commonError != nil {
+		resp.Diagnostics.Append(commonError.Diagnostics...)
+		return
+	}
+	if user == nil {
+		resp.Diagnostics.AddError("Failed to created user.", "User not exists after creation request")
+		return
+	}
+
+	plan = NewLinuxUserModel(user)
+	diags = resp.State.Set(linuxCtx.Ctx, plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

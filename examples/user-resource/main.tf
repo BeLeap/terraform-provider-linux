@@ -14,4 +14,5 @@ provider "linux" {
 
 resource "linux_user" "changseo_jang" {
   username = "testuser-changseo-jang"
+  gid = 2000
 }
