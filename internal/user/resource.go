@@ -3,8 +3,8 @@ package user
 import (
 	"context"
 	"fmt"
-	"terraform-provider-linux/lib"
-	"terraform-provider-linux/lib/commonssh"
+	"terraform-provider-linux/internal/util"
+	"terraform-provider-linux/internal/util/commonssh"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -55,7 +55,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	linuxCtx := lib.NewLinuxContext(ctx, r.session)
+	linuxCtx := util.NewLinuxContext(ctx, r.session)
 
 	command := "useradd"
 
@@ -89,7 +89,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	_, commonError := commonssh.RunCommand(
 		linuxCtx, command,
-		func(out []byte, err error) (lib.Status, error) { return lib.Failed, err },
+		func(out []byte, err error) (util.Status, error) { return util.Failed, err },
 	)
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
@@ -115,7 +115,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 }
 
 func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	linuxCtx := lib.NewLinuxContext(ctx, r.session)
+	linuxCtx := util.NewLinuxContext(ctx, r.session)
 
 	var state LinuxUserModel
 	diags := req.State.Get(linuxCtx.Ctx, &state)
@@ -159,7 +159,7 @@ func (r *userResource) Configure(_ context.Context, req resource.ConfigureReques
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *lib.CustomSsh, got: %T. Please report this this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *goph.Client, got: %T. Please report this this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}

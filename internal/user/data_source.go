@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	"terraform-provider-linux/lib"
+	"terraform-provider-linux/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -44,7 +44,7 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 }
 
 func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	linuxCtx := lib.NewLinuxContext(ctx, d.session)
+	linuxCtx := util.NewLinuxContext(ctx, d.session)
 
 	var state LinuxUserModel
 

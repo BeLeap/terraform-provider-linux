@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"terraform-provider-linux/lib"
-	"terraform-provider-linux/lib/commonssh"
+	"terraform-provider-linux/internal/util"
+	"terraform-provider-linux/internal/util/commonssh"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -17,20 +17,20 @@ type LinuxUser struct {
 	Gid      int64
 }
 
-func GetUser(linuxCtx lib.LinuxContext, username string) (*LinuxUser, *lib.CommonError) {
+func GetUser(linuxCtx util.LinuxContext, username string) (*LinuxUser, *util.CommonError) {
 	if username == "" {
 		diagnoistic := diag.NewErrorDiagnostic("Empty username", "Please specify username")
-		return nil, &lib.CommonError{
+		return nil, &util.CommonError{
 			Error:       nil,
 			Diagnostics: diag.Diagnostics{diagnoistic},
 		}
 	}
 
-	errorhandler := func(out []byte, err error) (lib.Status, error) {
+	errorhandler := func(out []byte, err error) (util.Status, error) {
 		if err.Error() == "Process exited with status 2" {
-			return lib.Success, nil
+			return util.Success, nil
 		}
-		return lib.Failed, err
+		return util.Failed, err
 	}
 	stdout, commonError := commonssh.RunCommand(linuxCtx, "getent passwd"+" "+username, errorhandler)
 	if commonError != nil {
@@ -45,7 +45,7 @@ func GetUser(linuxCtx lib.LinuxContext, username string) (*LinuxUser, *lib.Commo
 	uid, err := strconv.ParseInt(getent[2], 10, 64)
 	if err != nil {
 		diagnostic := diag.NewErrorDiagnostic("Failed to parse getent uid", fmt.Sprint(err.Error()))
-		return nil, &lib.CommonError{
+		return nil, &util.CommonError{
 			Error:       err,
 			Diagnostics: diag.Diagnostics{diagnostic},
 		}
@@ -54,7 +54,7 @@ func GetUser(linuxCtx lib.LinuxContext, username string) (*LinuxUser, *lib.Commo
 	gid, err := strconv.ParseInt(getent[3], 10, 64)
 	if err != nil {
 		diagnostic := diag.NewErrorDiagnostic("Failed to parse getent gid", fmt.Sprint(err.Error()))
-		return nil, &lib.CommonError{
+		return nil, &util.CommonError{
 			Error:       err,
 			Diagnostics: diag.Diagnostics{diagnostic},
 		}
