@@ -203,6 +203,40 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 }
 
 func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	linuxCtx := util.NewLinuxContext(ctx, r.client)
+
+	var state LinuxUserModel
+	diags := req.State.Get(linuxCtx.Ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	command := "userdel"
+	if state.Username.IsUnknown() || state.Username.IsNull() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("username"),
+			"Something wrong in username",
+			"Something wrong in username",
+		)
+		return
+	}
+	username := state.Username.ValueString()
+	if username == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("username"),
+			"Empty username is not allowed",
+			"Empty username is not allowed",
+		)
+		return
+	}
+
+	command = command + " " + username
+	_, commonError := sshUtil.RunCommand(linuxCtx, command, nil)
+	if commonError != nil {
+		resp.Diagnostics.Append(commonError.Diagnostics...)
+		return
+	}
 }
 
 func (r *userResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
