@@ -1,4 +1,4 @@
-package commonssh
+package ssh
 
 import (
 	"fmt"

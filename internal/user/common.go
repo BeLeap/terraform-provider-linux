@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"terraform-provider-linux/internal/util"
-	"terraform-provider-linux/internal/util/commonssh"
+	sshUtil "terraform-provider-linux/internal/util/ssh"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -32,7 +32,7 @@ func GetUser(linuxCtx util.LinuxContext, username string) (*LinuxUser, *util.Com
 		}
 		return util.Failed, err
 	}
-	stdout, commonError := commonssh.RunCommand(linuxCtx, "getent passwd"+" "+username, errorhandler)
+	stdout, commonError := sshUtil.RunCommand(linuxCtx, "getent passwd"+" "+username, errorhandler)
 	if commonError != nil {
 		return nil, commonError
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"terraform-provider-linux/internal/util"
-	"terraform-provider-linux/internal/util/commonssh"
+	sshUtil "terraform-provider-linux/internal/util/ssh"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -87,7 +87,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		command = command + " " + "--gid" + " " + fmt.Sprintf("%d", plan.Gid.ValueInt64())
 	}
 
-	_, commonError := commonssh.RunCommand(
+	_, commonError := sshUtil.RunCommand(
 		linuxCtx, command,
 		func(out []byte, err error) (util.Status, error) { return util.Failed, err },
 	)
