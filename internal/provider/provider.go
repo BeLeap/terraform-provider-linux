@@ -5,7 +5,7 @@ package provider
 
 import (
 	"context"
-	"terraform-provider-linux/internal/provider/user"
+	"terraform-provider-linux/internal/user"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
