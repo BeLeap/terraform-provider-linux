@@ -33,7 +33,7 @@ func NewLinuxUserModel(user *LinuxUser) LinuxUserModel {
 
 func Get(linuxCtx util.LinuxContext, username string) (*LinuxUser, *util.CommonError) {
 	if username == "" {
-		diagnoistic := diag.NewErrorDiagnostic("Empty username", "Please specify username")
+		diagnostic := diag.NewErrorDiagnostic("Empty username", "Please specify username")
 		return nil, &util.CommonError{
 			Error:       nil,
 			Diagnostics: diag.Diagnostics{diagnoistic},
