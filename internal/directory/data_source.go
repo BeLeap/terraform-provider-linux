@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	_ datasource.DataSource = &directoryDataSource{}
+	_ datasource.DataSource              = &directoryDataSource{}
+	_ datasource.DataSourceWithConfigure = &directoryDataSource{}
 )
 
 func NewDirectoryDataSource() datasource.DataSource {
@@ -20,6 +21,11 @@ func NewDirectoryDataSource() datasource.DataSource {
 
 type directoryDataSource struct {
 	client *goph.Client
+}
+
+// Configure implements datasource.DataSourceWithConfigure.
+func (*directoryDataSource) Configure(context.Context, datasource.ConfigureRequest, *datasource.ConfigureResponse) {
+	panic("unimplemented")
 }
 
 // Metadata implements datasource.DataSource.
