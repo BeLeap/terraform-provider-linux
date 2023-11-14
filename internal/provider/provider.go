@@ -5,6 +5,7 @@ package provider
 
 import (
 	"context"
+	"terraform-provider-linux/internal/directory"
 	"terraform-provider-linux/internal/user"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -162,6 +163,7 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 func (p *LinuxProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		user.NewUserDataSource,
+		directory.NewDirectoryDataSource,
 	}
 }
 
