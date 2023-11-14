@@ -20,8 +20,8 @@ type directoryDataSource struct {
 }
 
 // Metadata implements datasource.DataSource.
-func (*directoryDataSource) Metadata(context.Context, datasource.MetadataRequest, *datasource.MetadataResponse) {
-	panic("unimplemented")
+func (*directoryDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_directory"
 }
 
 // Read implements datasource.DataSource.
