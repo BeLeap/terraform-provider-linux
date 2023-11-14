@@ -22,7 +22,7 @@ func NewLinuxDirectoryModel(linuxDirectory *LinuxDirectory) LinuxDirectoryModel 
 }
 
 func Get(linuxCtx util.LinuxContext, path string) (*LinuxDirectory, *util.CommonError) {
-	_, commonError := sshUtil.RunCommand(linuxCtx, "get facl"+" "+path, nil)
+	_, commonError := sshUtil.RunCommand(linuxCtx, "getfacl"+" "+path, nil)
 	if commonError != nil {
 		return nil, commonError
 	}
