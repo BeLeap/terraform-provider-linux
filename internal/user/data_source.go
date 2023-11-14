@@ -78,7 +78,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	user, commonError := GetUser(linuxCtx, username)
+	user, commonError := Get(linuxCtx, username)
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return

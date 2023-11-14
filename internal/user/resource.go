@@ -98,7 +98,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	user, commonError := GetUser(linuxCtx, plan.Username.ValueString())
+	user, commonError := Get(linuxCtx, plan.Username.ValueString())
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
@@ -126,7 +126,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	user, commonError := GetUser(linuxCtx, state.Username.ValueString())
+	user, commonError := Get(linuxCtx, state.Username.ValueString())
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
@@ -190,7 +190,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	user, commonError := GetUser(linuxCtx, plan.Username.ValueString())
+	user, commonError := Get(linuxCtx, plan.Username.ValueString())
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return

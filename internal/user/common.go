@@ -17,7 +17,7 @@ type LinuxUser struct {
 	Gid      int64
 }
 
-func GetUser(linuxCtx util.LinuxContext, username string) (*LinuxUser, *util.CommonError) {
+func Get(linuxCtx util.LinuxContext, username string) (*LinuxUser, *util.CommonError) {
 	if username == "" {
 		diagnoistic := diag.NewErrorDiagnostic("Empty username", "Please specify username")
 		return nil, &util.CommonError{
