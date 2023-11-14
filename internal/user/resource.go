@@ -245,16 +245,9 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 }
 
 func (r *userResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	if req.ProviderData == nil {
-		return
-	}
-
-	providerData, ok := req.ProviderData.(*util.LinuxProviderData)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"ProviderData type assertion failed",
-			"Expected ProviderData to be *util.LinuxProviderData, got different type",
-		)
+	providerData, commonError := util.ConvetProviderData(req.ProviderData)
+	if commonError != nil {
+		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
 	}
 

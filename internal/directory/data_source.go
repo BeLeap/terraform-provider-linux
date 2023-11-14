@@ -24,16 +24,9 @@ type directoryDataSource struct {
 
 // Configure implements datasource.DataSourceWithConfigure.
 func (d *directoryDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	if req.ProviderData == nil {
-		return
-	}
-
-	providerData, ok := req.ProviderData.(*util.LinuxProviderData)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"ProviderData type assertion failed",
-			"Expected ProviderData to be *util.LinuxProviderData, got different type",
-		)
+	providerData, commonError := util.ConvetProviderData(req.ProviderData)
+	if commonError != nil {
+		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
 	}
 
