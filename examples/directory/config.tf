@@ -13,3 +13,7 @@ provider "linux" {
 }
 
 data "linux_directory" "test" {}
+
+output "test" {
+  value = data.linux_directory.test
+}
