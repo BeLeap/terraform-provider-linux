@@ -51,6 +51,10 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	diags := req.Config.Get(linuxCtx.Ctx, &state)
 	resp.Diagnostics.Append(diags...)
 
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	if state.Username.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("username"),
@@ -74,7 +78,7 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	user, commonError := GetUser(linuxCtx, username)
+	user, commonError := Get(linuxCtx, username)
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return

@@ -12,11 +12,15 @@ provider "linux" {
   private_key = file("../../ssh-keys/id_rsa")
 }
 
-data "linux_user" "user" {
-  username = "changseo-jang"
+data "linux_user" "root" {
+  username = "root"
 }
 
-output "user" {
-  value = data.linux_user.user
+resource "linux_user" "changseo_jang" {
+  username = "testuser-changseo-jang"
+  gid      = 2000
 }
 
+output "root" {
+  value = data.linux_user.root
+}

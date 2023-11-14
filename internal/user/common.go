@@ -17,9 +17,23 @@ type LinuxUser struct {
 	Gid      int64
 }
 
-func GetUser(linuxCtx util.LinuxContext, username string) (*LinuxUser, *util.CommonError) {
+type LinuxUserModel struct {
+	Username types.String `tfsdk:"username"`
+	Uid      types.Int64  `tfsdk:"uid"`
+	Gid      types.Int64  `tfsdk:"gid"`
+}
+
+func NewLinuxUserModel(user *LinuxUser) LinuxUserModel {
+	return LinuxUserModel{
+		Username: types.StringValue(user.Username),
+		Uid:      types.Int64Value(user.Uid),
+		Gid:      types.Int64Value(user.Gid),
+	}
+}
+
+func Get(linuxCtx util.LinuxContext, username string) (*LinuxUser, *util.CommonError) {
 	if username == "" {
-		diagnoistic := diag.NewErrorDiagnostic("Empty username", "Please specify username")
+		diagnostic := diag.NewErrorDiagnostic("Empty username", "Please specify username")
 		return nil, &util.CommonError{
 			Error:       nil,
 			Diagnostics: diag.Diagnostics{diagnoistic},
@@ -65,18 +79,4 @@ func GetUser(linuxCtx util.LinuxContext, username string) (*LinuxUser, *util.Com
 		Uid:      uid,
 		Gid:      gid,
 	}, nil
-}
-
-type LinuxUserModel struct {
-	Username types.String `tfsdk:"username"`
-	Uid      types.Int64  `tfsdk:"uid"`
-	Gid      types.Int64  `tfsdk:"gid"`
-}
-
-func NewLinuxUserModel(user *LinuxUser) LinuxUserModel {
-	return LinuxUserModel{
-		Username: types.StringValue(user.Username),
-		Uid:      types.Int64Value(user.Uid),
-		Gid:      types.Int64Value(user.Gid),
-	}
 }
