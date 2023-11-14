@@ -36,7 +36,7 @@ func Get(linuxCtx util.LinuxContext, username string) (*LinuxUser, *util.CommonE
 		diagnostic := diag.NewErrorDiagnostic("Empty username", "Please specify username")
 		return nil, &util.CommonError{
 			Error:       nil,
-			Diagnostics: diag.Diagnostics{diagnoistic},
+			Diagnostics: diag.Diagnostics{diagnostic},
 		}
 	}
 
