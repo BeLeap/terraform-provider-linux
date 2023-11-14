@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/melbahja/goph"
 )
 
@@ -30,6 +31,12 @@ func (*directoryDataSource) Read(context.Context, datasource.ReadRequest, *datas
 }
 
 // Schema implements datasource.DataSource.
-func (*directoryDataSource) Schema(context.Context, datasource.SchemaRequest, *datasource.SchemaResponse) {
-	panic("unimplemented")
+func (*directoryDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"path": schema.StringAttribute{
+				Required: true,
+			},
+		},
+	}
 }
