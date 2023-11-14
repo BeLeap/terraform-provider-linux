@@ -24,8 +24,21 @@ type directoryDataSource struct {
 }
 
 // Configure implements datasource.DataSourceWithConfigure.
-func (*directoryDataSource) Configure(context.Context, datasource.ConfigureRequest, *datasource.ConfigureResponse) {
-	panic("unimplemented")
+func (d *directoryDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+
+	client, ok := req.ProviderData.(*goph.Client)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			"Unexpected Data Source Configure Type",
+		)
+		return
+	}
+
+	d.client = client
 }
 
 // Metadata implements datasource.DataSource.
