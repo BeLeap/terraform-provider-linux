@@ -32,8 +32,8 @@ func (d *directoryDataSource) Configure(_ context.Context, req datasource.Config
 	client, ok := req.ProviderData.(*goph.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			"Unexpected Data Source Configure Type",
+			"ProviderData type assertion failed",
+			"Expected ProviderData to be *goph.Client, got different type",
 		)
 		return
 	}
@@ -63,7 +63,7 @@ func (d *directoryDataSource) Read(ctx context.Context, req datasource.ReadReque
 		resp.Diagnostics.AddAttributeError(
 			path.Root("path"),
 			"Wrong path",
-			"Wrong path",
+			"Invalid or unknown path provided",
 		)
 		return
 	}
@@ -73,7 +73,7 @@ func (d *directoryDataSource) Read(ctx context.Context, req datasource.ReadReque
 		resp.Diagnostics.AddAttributeError(
 			path.Root("path"),
 			"Empty path is not allowed",
-			"Please speicfy path",
+			"Please specify a valid path",
 		)
 		return
 	}
