@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/melbahja/goph"
 )
 
 var (
@@ -20,25 +19,18 @@ func NewDirectoryDataSource() datasource.DataSource {
 }
 
 type directoryDataSource struct {
-	client *goph.Client
+	providerData *util.LinuxProviderData
 }
 
 // Configure implements datasource.DataSourceWithConfigure.
 func (d *directoryDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	if req.ProviderData == nil {
+	providerData, commonError := util.ConvetProviderData(req.ProviderData)
+	if commonError != nil {
+		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
 	}
 
-	client, ok := req.ProviderData.(*goph.Client)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"ProviderData type assertion failed",
-			"Expected ProviderData to be *goph.Client, got different type",
-		)
-		return
-	}
-
-	d.client = client
+	d.providerData = providerData
 }
 
 // Metadata implements datasource.DataSource.
@@ -48,7 +40,7 @@ func (*directoryDataSource) Metadata(_ context.Context, req datasource.MetadataR
 
 // Read implements datasource.DataSource.
 func (d *directoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	linuxCtx := util.NewLinuxContext(ctx, d.client)
+	linuxCtx := util.NewLinuxContext(ctx, d.providerData)
 
 	var state LinuxDirectoryModel
 

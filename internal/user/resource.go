@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/melbahja/goph"
 )
 
 var (
@@ -25,7 +24,7 @@ func NewUserResource() resource.Resource {
 }
 
 type userResource struct {
-	client *goph.Client
+	providerData *util.LinuxProviderData
 }
 
 func (r *userResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -61,7 +60,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	linuxCtx := util.NewLinuxContext(ctx, r.client)
+	linuxCtx := util.NewLinuxContext(ctx, r.providerData)
 
 	command := "useradd"
 
@@ -117,7 +116,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 }
 
 func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	linuxCtx := util.NewLinuxContext(ctx, r.client)
+	linuxCtx := util.NewLinuxContext(ctx, r.providerData)
 
 	var state LinuxUserModel
 	diags := req.State.Get(linuxCtx.Ctx, &state)
@@ -147,7 +146,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 }
 
 func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	linuxCtx := util.NewLinuxContext(ctx, r.client)
+	linuxCtx := util.NewLinuxContext(ctx, r.providerData)
 
 	var plan LinuxUserModel
 	diags := req.Plan.Get(linuxCtx.Ctx, &plan)
@@ -209,7 +208,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 }
 
 func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	linuxCtx := util.NewLinuxContext(ctx, r.client)
+	linuxCtx := util.NewLinuxContext(ctx, r.providerData)
 
 	var state LinuxUserModel
 	diags := req.State.Get(linuxCtx.Ctx, &state)
@@ -246,20 +245,13 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 }
 
 func (r *userResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	if req.ProviderData == nil {
+	providerData, commonError := util.ConvetProviderData(req.ProviderData)
+	if commonError != nil {
+		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
 	}
 
-	client, ok := req.ProviderData.(*goph.Client)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *goph.Client, got: %T. Please report this this issue to the provider developers.", req.ProviderData),
-		)
-		return
-	}
-
-	r.client = client
+	r.providerData = providerData
 }
 
 func (r *userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

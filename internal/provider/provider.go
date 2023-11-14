@@ -1,12 +1,10 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 import (
 	"context"
 	"terraform-provider-linux/internal/directory"
 	"terraform-provider-linux/internal/user"
+	"terraform-provider-linux/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -156,8 +154,11 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		return
 	}
 
-	resp.DataSourceData = sshClient
-	resp.ResourceData = sshClient
+	providerData := &util.LinuxProviderData{
+		SshClient: sshClient,
+	}
+	resp.DataSourceData = providerData
+	resp.ResourceData = providerData
 }
 
 func (p *LinuxProvider) DataSources(_ context.Context) []func() datasource.DataSource {
