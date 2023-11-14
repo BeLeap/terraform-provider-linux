@@ -33,7 +33,7 @@ func BackoffRetry(fn func() Status, retry int) Status {
 		if count >= retry {
 			return result
 		}
-		time.Sleep(2 << count * time.Second)
+		time.Sleep(time.Duration(2) * time.Second << count)
 	}
 }
 
