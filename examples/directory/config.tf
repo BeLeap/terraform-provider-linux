@@ -13,7 +13,7 @@ provider "linux" {
 }
 
 data "linux_directory" "test" {
-  path = "/test"
+  path = "/etc"
 }
 
 output "test" {
