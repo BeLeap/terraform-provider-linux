@@ -104,8 +104,8 @@ func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 	providerData, ok := req.ProviderData.(*util.LinuxProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			"Unexpected Data Source Configure Type",
+			"ProviderData type assertion failed",
+			"Expected ProviderData to be *util.LinuxProviderData, got different type",
 		)
 
 		return

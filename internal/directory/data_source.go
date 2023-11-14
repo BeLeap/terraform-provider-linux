@@ -32,7 +32,7 @@ func (d *directoryDataSource) Configure(_ context.Context, req datasource.Config
 	if !ok {
 		resp.Diagnostics.AddError(
 			"ProviderData type assertion failed",
-			"Expected ProviderData to be *goph.Client, got different type",
+			"Expected ProviderData to be *util.LinuxProviderData, got different type",
 		)
 		return
 	}
