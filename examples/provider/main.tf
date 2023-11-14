@@ -11,8 +11,3 @@ provider "linux" {
   username    = "root"
   private_key = file("../../ssh-keys/id_rsa")
 }
-
-resource "linux_user" "changseo_jang" {
-  username = "testuser-changseo-jang"
-  gid = 2000
-}
