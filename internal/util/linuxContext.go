@@ -2,18 +2,16 @@ package util
 
 import (
 	"context"
-
-	"github.com/melbahja/goph"
 )
 
 type LinuxContext struct {
-	Ctx       context.Context
-	SshClient *goph.Client
+	Ctx          context.Context
+	ProviderData *LinuxProviderData
 }
 
-func NewLinuxContext(ctx context.Context, sshClient *goph.Client) LinuxContext {
+func NewLinuxContext(ctx context.Context, providerData *LinuxProviderData) LinuxContext {
 	return LinuxContext{
-		Ctx:       ctx,
-		SshClient: sshClient,
+		Ctx:          ctx,
+		ProviderData: providerData,
 	}
 }

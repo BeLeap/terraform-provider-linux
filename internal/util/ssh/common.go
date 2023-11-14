@@ -23,7 +23,7 @@ func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]
 
 	fn := func() util.Status {
 		var err error
-		out, err = linuxCtx.SshClient.Run(command)
+		out, err = linuxCtx.ProviderData.SshClient.Run(command)
 		if err != nil {
 			status, err := errorHandlerCoerced(out, err)
 			if err != nil {

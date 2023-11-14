@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/melbahja/goph"
 )
 
 var (
@@ -20,7 +19,7 @@ func NewUserDataSource() datasource.DataSource {
 }
 
 type userDataSource struct {
-	client *goph.Client
+	providerData *util.LinuxProviderData
 }
 
 func (d *userDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -44,7 +43,7 @@ func (d *userDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, r
 }
 
 func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	linuxCtx := util.NewLinuxContext(ctx, d.client)
+	linuxCtx := util.NewLinuxContext(ctx, d.providerData)
 
 	var state LinuxUserModel
 
@@ -102,7 +101,7 @@ func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 		return
 	}
 
-	client, ok := req.ProviderData.(*goph.Client)
+	providerData, ok := req.ProviderData.(*util.LinuxProviderData)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
@@ -112,5 +111,5 @@ func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRe
 		return
 	}
 
-	d.client = client
+	d.providerData = providerData
 }

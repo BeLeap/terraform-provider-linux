@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/melbahja/goph"
 )
 
 type CommonError struct {
@@ -34,4 +35,8 @@ func BackoffRetry(fn func() Status, retry int) Status {
 		}
 		time.Sleep(2 << count * time.Second)
 	}
+}
+
+type LinuxProviderData struct {
+	SshClient *goph.Client
 }
