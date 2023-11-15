@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"terraform-provider-linux/internal/util"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-func defaultErrorHandler(out []byte, err error) (util.Status, error) { return util.Failed, err }
+func defaultErrorHandler(out []byte, err error) (util.Status, *util.CommonError) {
+	return util.Failed, &util.CommonError{
+		Error: err,
+	}
+}
 
-func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]byte, error) (util.Status, error)) (string, *util.CommonError) {
+func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]byte, error) (util.Status, *util.CommonError)) (string, *util.CommonError) {
 	errorHandlerCoerced := errorhandler
 	if errorHandlerCoerced == nil {
 		errorHandlerCoerced = defaultErrorHandler
@@ -18,8 +21,7 @@ func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]
 
 	tflog.Info(linuxCtx.Ctx, fmt.Sprintf("Running command \"%s\"", command))
 	var out []byte
-	var errors []error
-	errors = []error{}
+	errors := []*util.CommonError{}
 
 	fn := func() util.Status {
 		var err error
@@ -35,16 +37,7 @@ func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]
 	}
 	_ = util.BackoffRetry(fn, 3)
 	if len(errors) != 0 {
-		var diagnostics diag.Diagnostics
-		var error error
-		for i, err := range errors {
-			diagnostics = append(diagnostics, diag.NewErrorDiagnostic(fmt.Sprintf("Retry %d: %v", i+1, err), string(out)))
-			error = err
-		}
-		return "", &util.CommonError{
-			Error:       error,
-			Diagnostics: diagnostics,
-		}
+		return "", util.FoldCommonError(errors)
 	}
 
 	return string(out), nil

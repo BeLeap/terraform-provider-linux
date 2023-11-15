@@ -7,9 +7,40 @@ import (
 	"github.com/melbahja/goph"
 )
 
+type MutlipleErrorContainer struct {
+	errors []error
+}
+
+func (e *MutlipleErrorContainer) Error() string {
+	errorString := ""
+	for _, err := range e.errors {
+		errorString = errorString + "\n" + err.Error()
+	}
+
+	return errorString
+}
+
 type CommonError struct {
 	Error       error
 	Diagnostics diag.Diagnostics
+}
+
+func FoldCommonError(arr []*CommonError) *CommonError {
+	var errors []error
+	diagnostics := diag.Diagnostics{}
+
+	for _, commonError := range arr {
+		errors = append(errors, commonError.Error)
+		diagnostics = append(diagnostics, commonError.Diagnostics...)
+	}
+	error := &MutlipleErrorContainer{
+		errors: errors,
+	}
+
+	return &CommonError{
+		Error:       error,
+		Diagnostics: diagnostics,
+	}
 }
 
 type Status int64
