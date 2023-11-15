@@ -44,9 +44,7 @@ func Get(linuxCtx util.LinuxContext, username string) (*LinuxUser, *util.CommonE
 		if err.Error() == "Process exited with status 2" {
 			return util.Success, nil
 		}
-		return util.Failed, &util.CommonError{
-			Error: err,
-		}
+		return sshUtil.DefaultErrorHandler(out, err)
 	}
 	stdout, commonError := sshUtil.RunCommand(linuxCtx, "getent passwd"+" "+username, errorhandler)
 	if commonError != nil {
