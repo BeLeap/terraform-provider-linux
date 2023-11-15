@@ -4,6 +4,7 @@ import (
 	"terraform-provider-linux/internal/util"
 	sshUtil "terraform-provider-linux/internal/util/ssh"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -22,7 +23,22 @@ func NewLinuxDirectoryModel(linuxDirectory *LinuxDirectory) LinuxDirectoryModel 
 }
 
 func Get(linuxCtx util.LinuxContext, path string) (*LinuxDirectory, *util.CommonError) {
-	_, commonError := sshUtil.RunCommand(linuxCtx, "getfacl"+" "+path, nil)
+	errorhandler := func(out []byte, err error) (util.Status, *util.CommonError) {
+		if err.Error() == "Process exited with status 1" {
+			diagnostic := diag.NewErrorDiagnostic(
+				"Directory not found",
+				"Please check path",
+			)
+			return util.Success, &util.CommonError{
+				Error: err,
+				Diagnostics: diag.Diagnostics{
+					diagnostic,
+				},
+			}
+		}
+		return sshUtil.DefaultErrorHandler(out, err)
+	}
+	_, commonError := sshUtil.RunCommand(linuxCtx, "getfacl"+" "+path, errorhandler)
 	if commonError != nil {
 		return nil, commonError
 	}
