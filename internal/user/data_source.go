@@ -97,7 +97,10 @@ func (d *userDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 }
 
 func (d *userDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	providerData, commonError := util.ConvetProviderData(req.ProviderData)
+	providerData, commonError := util.ConvertProviderData(req.ProviderData)
+	if providerData == nil && commonError == nil {
+		return
+	}
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return

@@ -72,15 +72,9 @@ type LinuxProviderData struct {
 	SshClient *goph.Client
 }
 
-func ConvetProviderData(providerData any) (*LinuxProviderData, *CommonError) {
+func ConvertProviderData(providerData any) (*LinuxProviderData, *CommonError) {
 	if providerData == nil {
-		diagnostic := diag.NewErrorDiagnostic(
-			"Empty ProviderData",
-			"ProviderData is empty. Please check.",
-		)
-		return nil, &CommonError{
-			Diagnostics: diag.Diagnostics{diagnostic},
-		}
+		return nil, nil
 	}
 
 	linuxProviderData, ok := providerData.(*LinuxProviderData)

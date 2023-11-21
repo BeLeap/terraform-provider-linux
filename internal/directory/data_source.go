@@ -24,7 +24,10 @@ type directoryDataSource struct {
 
 // Configure implements datasource.DataSourceWithConfigure.
 func (d *directoryDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	providerData, commonError := util.ConvetProviderData(req.ProviderData)
+	providerData, commonError := util.ConvertProviderData(req.ProviderData)
+	if providerData == nil && commonError == nil {
+		return
+	}
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return

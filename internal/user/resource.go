@@ -244,8 +244,11 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	}
 }
 
-func (r *userResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	providerData, commonError := util.ConvetProviderData(req.ProviderData)
+func (r *userResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	providerData, commonError := util.ConvertProviderData(req.ProviderData)
+	if providerData == nil && commonError == nil {
+		return
+	}
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
