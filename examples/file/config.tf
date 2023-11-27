@@ -12,10 +12,10 @@ provider "linux" {
   private_key = file("../../ssh-keys/id_rsa")
 }
 
-data "linux_directory" "test" {
+data "linux_file" "test" {
   path = "/test"
 }
 
 output "test" {
-  value = data.linux_directory.test
+  value = data.linux_file.test
 }

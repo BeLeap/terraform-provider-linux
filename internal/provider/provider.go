@@ -2,7 +2,7 @@ package provider
 
 import (
 	"context"
-	"terraform-provider-linux/internal/directory"
+	"terraform-provider-linux/internal/file"
 	"terraform-provider-linux/internal/user"
 	"terraform-provider-linux/internal/util"
 
@@ -164,7 +164,7 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 func (p *LinuxProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		user.NewUserDataSource,
-		directory.NewDirectoryDataSource,
+		file.NewFileDataSource,
 	}
 }
 

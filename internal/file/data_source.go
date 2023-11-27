@@ -1,4 +1,4 @@
-package directory
+package file
 
 import (
 	"context"
@@ -10,20 +10,20 @@ import (
 )
 
 var (
-	_ datasource.DataSource              = &directoryDataSource{}
-	_ datasource.DataSourceWithConfigure = &directoryDataSource{}
+	_ datasource.DataSource              = &fileDataSource{}
+	_ datasource.DataSourceWithConfigure = &fileDataSource{}
 )
 
-func NewDirectoryDataSource() datasource.DataSource {
-	return &directoryDataSource{}
+func NewFileDataSource() datasource.DataSource {
+	return &fileDataSource{}
 }
 
-type directoryDataSource struct {
+type fileDataSource struct {
 	providerData *util.LinuxProviderData
 }
 
 // Configure implements datasource.DataSourceWithConfigure.
-func (d *directoryDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *fileDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	providerData, commonError := util.ConvertProviderData(req.ProviderData)
 	if providerData == nil && commonError == nil {
 		return
@@ -37,15 +37,15 @@ func (d *directoryDataSource) Configure(_ context.Context, req datasource.Config
 }
 
 // Metadata implements datasource.DataSource.
-func (*directoryDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_directory"
+func (*fileDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_file"
 }
 
 // Read implements datasource.DataSource.
-func (d *directoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *fileDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	linuxCtx := util.NewLinuxContext(ctx, d.providerData)
 
-	var state LinuxDirectoryModel
+	var state LinuxFileModel
 
 	diags := req.Config.Get(linuxCtx.Ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -79,7 +79,7 @@ func (d *directoryDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	state = NewLinuxDirectoryModel(directory)
+	state = NewLinuxFileModel(directory)
 
 	diags = resp.State.Set(linuxCtx.Ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -89,7 +89,7 @@ func (d *directoryDataSource) Read(ctx context.Context, req datasource.ReadReque
 }
 
 // Schema implements datasource.DataSource.
-func (*directoryDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (*fileDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"path": schema.StringAttribute{

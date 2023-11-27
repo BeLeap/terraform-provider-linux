@@ -1,4 +1,4 @@
-package directory
+package file
 
 import (
 	"terraform-provider-linux/internal/util"
@@ -8,21 +8,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type LinuxDirectory struct {
+type LinuxFile struct {
 	Path string
 }
 
-type LinuxDirectoryModel struct {
+type LinuxFileModel struct {
 	Path types.String `tfsdk:"path"`
 }
 
-func NewLinuxDirectoryModel(linuxDirectory *LinuxDirectory) LinuxDirectoryModel {
-	return LinuxDirectoryModel{
+func NewLinuxFileModel(linuxDirectory *LinuxFile) LinuxFileModel {
+	return LinuxFileModel{
 		Path: types.StringValue(linuxDirectory.Path),
 	}
 }
 
-func Get(linuxCtx util.LinuxContext, path string) (*LinuxDirectory, *util.CommonError) {
+func Get(linuxCtx util.LinuxContext, path string) (*LinuxFile, *util.CommonError) {
 	errorhandler := func(out []byte, err error) (util.Status, *util.CommonError) {
 		switch err.Error() {
 		case "Process exited with status 1":
@@ -44,7 +44,7 @@ func Get(linuxCtx util.LinuxContext, path string) (*LinuxDirectory, *util.Common
 	if commonError != nil {
 		return nil, commonError
 	}
-	return &LinuxDirectory{
+	return &LinuxFile{
 		Path: path,
 	}, nil
 }
