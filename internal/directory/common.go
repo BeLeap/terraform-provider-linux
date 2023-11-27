@@ -24,7 +24,8 @@ func NewLinuxDirectoryModel(linuxDirectory *LinuxDirectory) LinuxDirectoryModel 
 
 func Get(linuxCtx util.LinuxContext, path string) (*LinuxDirectory, *util.CommonError) {
 	errorhandler := func(out []byte, err error) (util.Status, *util.CommonError) {
-		if err.Error() == "Process exited with status 1" {
+		switch err.Error() {
+		case "Process exited with status 1":
 			diagnostic := diag.NewErrorDiagnostic(
 				"Directory not found",
 				"Please check path",
@@ -35,8 +36,9 @@ func Get(linuxCtx util.LinuxContext, path string) (*LinuxDirectory, *util.Common
 					diagnostic,
 				},
 			}
+		default:
+			return sshUtil.DefaultErrorHandler(out, err)
 		}
-		return sshUtil.DefaultErrorHandler(out, err)
 	}
 	_, commonError := sshUtil.RunCommand(linuxCtx, "getfacl"+" "+path, errorhandler)
 	if commonError != nil {
