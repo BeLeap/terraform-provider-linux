@@ -10,24 +10,27 @@ import (
 
 type LinuxFile struct {
 	Path string
+	Type string
 }
 
 type LinuxFileModel struct {
 	Path types.String `tfsdk:"path"`
+	Type types.String `tfsdk:"type"`
 }
 
 func NewLinuxFileModel(linuxDirectory *LinuxFile) LinuxFileModel {
 	return LinuxFileModel{
 		Path: types.StringValue(linuxDirectory.Path),
+		Type: types.StringValue(linuxDirectory.Type),
 	}
 }
 
-func Get(linuxCtx util.LinuxContext, path string) (*LinuxFile, *util.CommonError) {
+func Get(linuxCtx util.LinuxContext, file *LinuxFile) (*LinuxFile, *util.CommonError) {
 	errorhandler := func(out []byte, err error) (util.Status, *util.CommonError) {
 		switch err.Error() {
 		case "Process exited with status 1":
 			diagnostic := diag.NewErrorDiagnostic(
-				"Directory not found",
+				"Path not found",
 				"Please check path",
 			)
 			return util.Success, &util.CommonError{
@@ -40,11 +43,12 @@ func Get(linuxCtx util.LinuxContext, path string) (*LinuxFile, *util.CommonError
 			return sshUtil.DefaultErrorHandler(out, err)
 		}
 	}
-	_, commonError := sshUtil.RunCommand(linuxCtx, "getfacl"+" "+path, errorhandler)
+	_, commonError := sshUtil.RunCommand(linuxCtx, "getfacl"+" "+file.Path, errorhandler)
 	if commonError != nil {
 		return nil, commonError
 	}
 	return &LinuxFile{
-		Path: path,
+		Path: file.Path,
+		Type: file.Type,
 	}, nil
 }

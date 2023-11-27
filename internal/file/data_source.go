@@ -62,9 +62,17 @@ func (d *fileDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		)
 		return
 	}
+	if state.Type.IsUnknown() || state.Type.IsNull() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("type"),
+			"Wrong type",
+			"Invalid or unknown type provided",
+		)
+		return
+	}
 
-	directory_path := state.Path.ValueString()
-	if directory_path == "" {
+	file_path := state.Path.ValueString()
+	if file_path == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("path"),
 			"Empty path is not allowed",
@@ -72,14 +80,27 @@ func (d *fileDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		)
 		return
 	}
+	file_type := state.Type.ValueString()
+	if file_type != "file" && file_type != "directory" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("type"),
+			"Invalid type specified",
+			"Please specify a valid path",
+		)
+		return
+	}
+	incomplete_file := &LinuxFile{
+		Path: file_path,
+		Type: file_type,
+	}
 
-	directory, commonError := Get(linuxCtx, directory_path)
+	file, commonError := Get(linuxCtx, incomplete_file)
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
 	}
 
-	state = NewLinuxFileModel(directory)
+	state = NewLinuxFileModel(file)
 
 	diags = resp.State.Set(linuxCtx.Ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -94,6 +115,10 @@ func (*fileDataSource) Schema(_ context.Context, req datasource.SchemaRequest, r
 		Attributes: map[string]schema.Attribute{
 			"path": schema.StringAttribute{
 				Required: true,
+			},
+			"type": schema.StringAttribute{
+				Description: "Specify type of file. Can be either `file` or `directory`",
+				Required:    true,
 			},
 		},
 	}
