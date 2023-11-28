@@ -1,6 +1,7 @@
 package file
 
 import (
+	"strings"
 	"terraform-provider-linux/internal/util"
 	sshUtil "terraform-provider-linux/internal/util/ssh"
 
@@ -11,17 +12,20 @@ import (
 type LinuxFile struct {
 	Path string
 	Type string
+	Acl  *Facl
 }
 
 type LinuxFileModel struct {
 	Path types.String `tfsdk:"path"`
 	Type types.String `tfsdk:"type"`
+	Acl  FaclModel    `tfsdk:"acl"`
 }
 
 func NewLinuxFileModel(linuxFile *LinuxFile) LinuxFileModel {
 	return LinuxFileModel{
 		Path: types.StringValue(linuxFile.Path),
 		Type: types.StringValue(linuxFile.Type),
+		Acl:  newFaclModel(linuxFile.Acl),
 	}
 }
 
@@ -34,6 +38,14 @@ type FaclModel struct {
 	User  types.Int64 `tfsdk:"user"`
 	Group types.Int64 `tfsdk:"group"`
 	Other types.Int64 `tfsdk:"other"`
+}
+
+func newFaclModel(facl *Facl) FaclModel {
+	return FaclModel{
+		User:  types.Int64Value(facl.User),
+		Group: types.Int64Value(facl.Group),
+		Other: types.Int64Value(facl.Other),
+	}
 }
 
 func Get(linuxCtx util.LinuxContext, file *LinuxFile) (*LinuxFile, *util.CommonError) {
