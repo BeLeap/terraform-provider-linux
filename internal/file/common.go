@@ -48,6 +48,21 @@ func newFaclModel(facl *Facl) FaclModel {
 	}
 }
 
+type FaclLine struct {
+	Id        int64
+	Permisson int64
+}
+type FaclLineModel struct {
+	Id        types.Int64 `tfsdk:"id"`
+	Permisson types.Int64 `tfsdk:"permisson"`
+}
+
+func newFaclLineModel(faclLine *FaclLine) FaclLineModel {
+	return FaclLineModel{
+		Id:        types.Int64Value(faclLine.Id),
+		Permisson: types.Int64Value(faclLine.Permisson),
+	}
+}
 func Get(linuxCtx util.LinuxContext, file *LinuxFile) (*LinuxFile, *util.CommonError) {
 	errorhandler := func(out []byte, err error) (util.Status, *util.CommonError) {
 		switch err.Error() {
