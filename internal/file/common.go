@@ -1,6 +1,9 @@
 package file
 
 import (
+	"errors"
+	"fmt"
+	"strconv"
 	"strings"
 	"terraform-provider-linux/internal/util"
 	sshUtil "terraform-provider-linux/internal/util/ssh"
@@ -63,6 +66,148 @@ func newFaclLineModel(faclLine *FaclLine) FaclLineModel {
 		Permisson: types.Int64Value(faclLine.Permisson),
 	}
 }
+
+type PermissionType int64
+
+const (
+	Read         PermissionType = 4
+	Write        PermissionType = 2
+	Execute      PermissionType = 1
+	NoPermission PermissionType = 0
+	Invalid      PermissionType = -1
+)
+
+func mapPermissionTypeToString(permissionType PermissionType) (string, error) {
+	switch permissionType {
+	case Read:
+		return "r", nil
+	case Write:
+		return "w", nil
+	case Execute:
+		return "x", nil
+	case NoPermission:
+		return "-", nil
+	default:
+		return "", errors.New(fmt.Sprintf("There is no string to map %d", permissionType))
+	}
+}
+func parsePermissionTypeString(in string, permissionType PermissionType) (string, PermissionType, error) {
+	permissionTypeString, err := mapPermissionTypeToString(permissionType)
+	if err != nil {
+		return "", 0, err
+	}
+	after, found := strings.CutPrefix(in, permissionTypeString)
+	if found {
+		return after, permissionType, nil
+	}
+
+	noPermissionString, err := mapPermissionTypeToString(NoPermission)
+	if err != nil {
+		return "", 0, err
+	}
+	after, found = strings.CutPrefix(in, noPermissionString)
+	if found {
+		return after, NoPermission, nil
+	}
+
+	return "", 0, errors.New(fmt.Sprintf("Invalid permission type string \"%s\" provided", in))
+}
+
+func parseFacl(content string) (*Facl, error) {
+	lines := strings.Split(content, "\n")
+
+	parsePermissionString := func(in string) (PermissionType, error) {
+		permissionString := in
+		var err error
+
+		permission := NoPermission
+		permissionForType := NoPermission
+
+		permissionString, permissionForType, err = parsePermissionTypeString(permissionString, Read)
+		if err != nil {
+			return Invalid, err
+		}
+		permission = permission + permissionForType
+
+		permissionString, permissionForType, err = parsePermissionTypeString(permissionString, Write)
+		if err != nil {
+			return Invalid, err
+		}
+		permission = permission + permissionForType
+
+		permissionString, permissionForType, err = parsePermissionTypeString(permissionString, Execute)
+		if err != nil {
+			return Invalid, err
+		}
+		permission = permission + permissionForType
+
+		return permission, nil
+	}
+
+	var userAcl *FaclLine
+	var groupAcl *FaclLine
+	var otherAcl *FaclLine
+
+	var err error
+	for _, line := range lines {
+		if after, found := strings.CutPrefix(line, "USER"); found {
+			splitted := strings.Split(after, " ")
+
+			id, err := strconv.ParseInt(splitted[0], 10, 64)
+			if err != nil {
+				return nil, err
+			}
+
+			permission, err := parsePermissionString(splitted[1])
+			if err != nil {
+				return nil, err
+			}
+
+			userAcl = &FaclLine{
+				Id:        id,
+				Permisson: int64(permission),
+			}
+		}
+		if after, found := strings.CutPrefix(line, "GROUP"); found {
+			splitted := strings.Split(after, " ")
+
+			id, err := strconv.ParseInt(splitted[0], 10, 64)
+			if err != nil {
+				return nil, err
+			}
+
+			permission, err := parsePermissionString(splitted[1])
+			if err != nil {
+				return nil, err
+			}
+
+			groupAcl = &FaclLine{
+				Id:        id,
+				Permisson: int64(permission),
+			}
+		}
+		if after, found := strings.CutPrefix(line, "other"); found {
+			splitted := strings.Split(after, " ")
+
+			permission, err := parsePermissionString(splitted[1])
+			if err != nil {
+				return nil, err
+			}
+
+			otherAcl = &FaclLine{
+				Id:        -1,
+				Permisson: int64(permission),
+			}
+		}
+	}
+
+	return &Facl{
+		User:  userAcl,
+		Group: groupAcl,
+		Other: otherAcl,
+	}, nil
+}
+
 func Get(linuxCtx util.LinuxContext, file *LinuxFile) (*LinuxFile, *util.CommonError) {
 	errorhandler := func(out []byte, err error) (util.Status, *util.CommonError) {
 		switch err.Error() {
