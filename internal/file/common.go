@@ -57,7 +57,7 @@ type FaclLine struct {
 }
 type FaclLineModel struct {
 	Id        types.Int64 `tfsdk:"id"`
-	Permisson types.Int64 `tfsdk:"permisson"`
+	Permisson types.Int64 `tfsdk:"permission"`
 }
 
 func newFaclLineModel(faclLine *FaclLine) *FaclLineModel {
