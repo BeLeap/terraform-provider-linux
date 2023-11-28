@@ -21,7 +21,7 @@ type LinuxFile struct {
 type LinuxFileModel struct {
 	Path types.String `tfsdk:"path"`
 	Type types.String `tfsdk:"type"`
-	Acl  FaclModel    `tfsdk:"acl"`
+	Acl  *FaclModel   `tfsdk:"acl"`
 }
 
 func NewLinuxFileModel(linuxFile *LinuxFile) LinuxFileModel {
@@ -38,13 +38,13 @@ type Facl struct {
 	Other *FaclLine
 }
 type FaclModel struct {
-	User  FaclLineModel `tfsdk:"user"`
-	Group FaclLineModel `tfsdk:"group"`
-	Other FaclLineModel `tfsdk:"other"`
+	User  *FaclLineModel `tfsdk:"user"`
+	Group *FaclLineModel `tfsdk:"group"`
+	Other *FaclLineModel `tfsdk:"other"`
 }
 
-func newFaclModel(facl *Facl) FaclModel {
-	return FaclModel{
+func newFaclModel(facl *Facl) *FaclModel {
+	return &FaclModel{
 		User:  newFaclLineModel(facl.User),
 		Group: newFaclLineModel(facl.Group),
 		Other: newFaclLineModel(facl.Other),
@@ -60,8 +60,8 @@ type FaclLineModel struct {
 	Permisson types.Int64 `tfsdk:"permisson"`
 }
 
-func newFaclLineModel(faclLine *FaclLine) FaclLineModel {
-	return FaclLineModel{
+func newFaclLineModel(faclLine *FaclLine) *FaclLineModel {
+	return &FaclLineModel{
 		Id:        types.Int64Value(faclLine.Id),
 		Permisson: types.Int64Value(faclLine.Permisson),
 	}
