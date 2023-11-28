@@ -230,19 +230,19 @@ func Get(linuxCtx util.LinuxContext, file *LinuxFile) (*LinuxFile, *util.CommonE
 	if commonError != nil {
 		return nil, commonError
 	}
-
-	lines := strings.Split(stdout, "\n")
-
-	var userAclString string
-	var groupAclString string
-	var otherAclString string
-	for _, line := range lines {
-		if strings.HasPrefix(line, "USER") {
+	acl, err := parseFacl(stdout)
+	if err != nil {
+		return nil, &util.CommonError{
+			Error: err,
+			Diagnostics: diag.Diagnostics{
+				diag.NewErrorDiagnostic("Failed to parse facl", fmt.Sprintf("Failed to parse facl content: %s", stdout)),
+			},
 		}
 	}
 
 	return &LinuxFile{
 		Path: file.Path,
 		Type: file.Type,
+		Acl:  acl,
 	}, nil
 }
