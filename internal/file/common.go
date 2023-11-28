@@ -18,10 +18,10 @@ type LinuxFileModel struct {
 	Type types.String `tfsdk:"type"`
 }
 
-func NewLinuxFileModel(linuxDirectory *LinuxFile) LinuxFileModel {
+func NewLinuxFileModel(linuxFile *LinuxFile) LinuxFileModel {
 	return LinuxFileModel{
-		Path: types.StringValue(linuxDirectory.Path),
-		Type: types.StringValue(linuxDirectory.Type),
+		Path: types.StringValue(linuxFile.Path),
+		Type: types.StringValue(linuxFile.Type),
 	}
 }
 
