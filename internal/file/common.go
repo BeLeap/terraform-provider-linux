@@ -30,21 +30,21 @@ func NewLinuxFileModel(linuxFile *LinuxFile) LinuxFileModel {
 }
 
 type Facl struct {
-	User  int64
-	Group int64
-	Other int64
+	User  *FaclLine
+	Group *FaclLine
+	Other *FaclLine
 }
 type FaclModel struct {
-	User  types.Int64 `tfsdk:"user"`
-	Group types.Int64 `tfsdk:"group"`
-	Other types.Int64 `tfsdk:"other"`
+	User  FaclLineModel `tfsdk:"user"`
+	Group FaclLineModel `tfsdk:"group"`
+	Other FaclLineModel `tfsdk:"other"`
 }
 
 func newFaclModel(facl *Facl) FaclModel {
 	return FaclModel{
-		User:  types.Int64Value(facl.User),
-		Group: types.Int64Value(facl.Group),
-		Other: types.Int64Value(facl.Other),
+		User:  newFaclLineModel(facl.User),
+		Group: newFaclLineModel(facl.Group),
+		Other: newFaclLineModel(facl.Other),
 	}
 }
 
