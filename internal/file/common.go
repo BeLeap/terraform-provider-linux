@@ -81,7 +81,7 @@ func Get(linuxCtx util.LinuxContext, file *LinuxFile) (*LinuxFile, *util.CommonE
 			return sshUtil.DefaultErrorHandler(out, err)
 		}
 	}
-	stdout, commonError := sshUtil.RunCommand(linuxCtx, "getfacl -t"+" "+file.Path, errorhandler)
+	stdout, commonError := sshUtil.RunCommand(linuxCtx, "getfacl -nt"+" "+file.Path, errorhandler)
 	if commonError != nil {
 		return nil, commonError
 	}
