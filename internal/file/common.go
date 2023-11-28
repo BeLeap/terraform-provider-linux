@@ -150,7 +150,7 @@ func parseFacl(content string) (*Facl, error) {
 
 	for _, line := range lines {
 		if after, found := strings.CutPrefix(line, "USER"); found {
-			splitted := strings.Split(after, " ")
+			splitted := strings.Fields(after)
 
 			id, err := strconv.ParseInt(splitted[0], 10, 64)
 			if err != nil {
@@ -168,7 +168,7 @@ func parseFacl(content string) (*Facl, error) {
 			}
 		}
 		if after, found := strings.CutPrefix(line, "GROUP"); found {
-			splitted := strings.Split(after, " ")
+			splitted := strings.Fields(after)
 
 			id, err := strconv.ParseInt(splitted[0], 10, 64)
 			if err != nil {
@@ -186,9 +186,9 @@ func parseFacl(content string) (*Facl, error) {
 			}
 		}
 		if after, found := strings.CutPrefix(line, "other"); found {
-			splitted := strings.Split(after, " ")
+			splitted := strings.Fields(after)
 
-			permission, err := parsePermissionString(splitted[1])
+			permission, err := parsePermissionString(splitted[0])
 			if err != nil {
 				return nil, err
 			}
@@ -234,7 +234,7 @@ func Get(linuxCtx util.LinuxContext, file *LinuxFile) (*LinuxFile, *util.CommonE
 		return nil, &util.CommonError{
 			Error: err,
 			Diagnostics: diag.Diagnostics{
-				diag.NewErrorDiagnostic("Failed to parse facl", fmt.Sprintf("Failed to parse facl content: %s", stdout)),
+				diag.NewErrorDiagnostic("Failed to parse facl", fmt.Sprintf("Error: %v\nFailed to parse facl content:\n%s", err, stdout)),
 			},
 		}
 	}
