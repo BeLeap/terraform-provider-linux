@@ -111,6 +111,18 @@ func (d *fileDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 // Schema implements datasource.DataSource.
 func (*fileDataSource) Schema(_ context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	faclLineSchema := schema.SingleNestedAttribute{
+		Computed: true,
+		Attributes: map[string]schema.Attribute{
+			"id": schema.Int64Attribute{
+				Computed: true,
+			},
+			"permission": schema.Int64Attribute{
+				Computed: true,
+			},
+		},
+	}
+
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"path": schema.StringAttribute{
@@ -119,6 +131,14 @@ func (*fileDataSource) Schema(_ context.Context, req datasource.SchemaRequest, r
 			"type": schema.StringAttribute{
 				Description: "Specify type of file. Can be either `file` or `directory`",
 				Required:    true,
+			},
+			"acl": schema.SingleNestedAttribute{
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+					"user":  faclLineSchema,
+					"group": faclLineSchema,
+					"other": faclLineSchema,
+				},
 			},
 		},
 	}
