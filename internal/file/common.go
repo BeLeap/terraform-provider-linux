@@ -25,6 +25,17 @@ func NewLinuxFileModel(linuxFile *LinuxFile) LinuxFileModel {
 	}
 }
 
+type Facl struct {
+	User  int64
+	Group int64
+	Other int64
+}
+type FaclModel struct {
+	User  types.Int64 `tfsdk:"user"`
+	Group types.Int64 `tfsdk:"group"`
+	Other types.Int64 `tfsdk:"other"`
+}
+
 func Get(linuxCtx util.LinuxContext, file *LinuxFile) (*LinuxFile, *util.CommonError) {
 	errorhandler := func(out []byte, err error) (util.Status, *util.CommonError) {
 		switch err.Error() {
@@ -43,10 +54,21 @@ func Get(linuxCtx util.LinuxContext, file *LinuxFile) (*LinuxFile, *util.CommonE
 			return sshUtil.DefaultErrorHandler(out, err)
 		}
 	}
-	_, commonError := sshUtil.RunCommand(linuxCtx, "getfacl"+" "+file.Path, errorhandler)
+	stdout, commonError := sshUtil.RunCommand(linuxCtx, "getfacl -t"+" "+file.Path, errorhandler)
 	if commonError != nil {
 		return nil, commonError
 	}
+
+	lines := strings.Split(stdout, "\n")
+
+	var userAclString string
+	var groupAclString string
+	var otherAclString string
+	for _, line := range lines {
+		if strings.HasPrefix(line, "USER") {
+		}
+	}
+
 	return &LinuxFile{
 		Path: file.Path,
 		Type: file.Type,
