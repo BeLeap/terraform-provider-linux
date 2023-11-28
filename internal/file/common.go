@@ -148,7 +148,6 @@ func parseFacl(content string) (*Facl, error) {
 	var groupAcl *FaclLine
 	var otherAcl *FaclLine
 
-	var err error
 	for _, line := range lines {
 		if after, found := strings.CutPrefix(line, "USER"); found {
 			splitted := strings.Split(after, " ")
