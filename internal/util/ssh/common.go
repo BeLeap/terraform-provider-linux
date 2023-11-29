@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-func DefaultErrorHandler(out []byte, err error) (util.Status, *util.CommonError) {
+func defaultErrorHandler(out []byte, err error) (util.Status, *util.CommonError) {
 	if err != nil {
 		return util.Failed, &util.CommonError{
 			Error: err,
@@ -32,7 +32,7 @@ func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]
 			status, commonError = errorhandler(out, err)
 		}
 		if status == util.Bottom {
-			status, commonError = errorhandler(out, err)
+			status, commonError = defaultErrorHandler(out, err)
 		}
 
 		if commonError != nil {
