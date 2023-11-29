@@ -52,18 +52,18 @@ func newFaclModel(facl *Facl) *FaclModel {
 }
 
 type FaclLine struct {
-	Id        int64
-	Permisson int64
+	Id         int64
+	Permission int64
 }
 type FaclLineModel struct {
-	Id        types.Int64 `tfsdk:"id"`
-	Permisson types.Int64 `tfsdk:"permission"`
+	Id         types.Int64 `tfsdk:"id"`
+	Permission types.Int64 `tfsdk:"permission"`
 }
 
 func newFaclLineModel(faclLine *FaclLine) *FaclLineModel {
 	return &FaclLineModel{
-		Id:        types.Int64Value(faclLine.Id),
-		Permisson: types.Int64Value(faclLine.Permisson),
+		Id:         types.Int64Value(faclLine.Id),
+		Permission: types.Int64Value(faclLine.Permission),
 	}
 }
 
@@ -163,8 +163,8 @@ func parseFacl(content string) (*Facl, error) {
 			}
 
 			userAcl = &FaclLine{
-				Id:        id,
-				Permisson: int64(permission),
+				Id:         id,
+				Permission: int64(permission),
 			}
 		}
 		if after, found := strings.CutPrefix(line, "GROUP"); found {
@@ -181,8 +181,8 @@ func parseFacl(content string) (*Facl, error) {
 			}
 
 			groupAcl = &FaclLine{
-				Id:        id,
-				Permisson: int64(permission),
+				Id:         id,
+				Permission: int64(permission),
 			}
 		}
 		if after, found := strings.CutPrefix(line, "other"); found {
@@ -194,8 +194,8 @@ func parseFacl(content string) (*Facl, error) {
 			}
 
 			otherAcl = &FaclLine{
-				Id:        -1,
-				Permisson: int64(permission),
+				Id:         -1,
+				Permission: int64(permission),
 			}
 		}
 	}
