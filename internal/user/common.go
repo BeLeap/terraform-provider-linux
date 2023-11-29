@@ -50,7 +50,7 @@ func Get(linuxCtx util.LinuxContext, username string) (*LinuxUser, *util.CommonE
 
 		return util.Bottom, nil
 	}
-	stdout, commonError := sshUtil.RunCommand(linuxCtx, "getent passwd"+" "+username, errorhandler)
+	_, stdout, commonError := sshUtil.RunCommand(linuxCtx, "getent passwd"+" "+username, errorhandler)
 	if commonError != nil {
 		return nil, commonError
 	}

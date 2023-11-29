@@ -16,7 +16,7 @@ func defaultErrorHandler(out []byte, err error) (util.Status, *util.CommonError)
 	return util.Success, nil
 }
 
-func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]byte, error) (util.Status, *util.CommonError)) (string, *util.CommonError) {
+func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]byte, error) (util.Status, *util.CommonError)) (util.Status, string, *util.CommonError) {
 	tflog.Info(linuxCtx.Ctx, fmt.Sprintf("Running command \"%s\"", command))
 	var out []byte
 	errors := []*util.CommonError{}
@@ -40,10 +40,10 @@ func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]
 		}
 		return status
 	}
-	_ = util.BackoffRetry(fn, 3)
+	status := util.BackoffRetry(fn, 3)
 	if len(errors) != 0 {
-		return "", util.FoldCommonError(errors)
+		return status, "", util.FoldCommonError(errors)
 	}
 
-	return string(out), nil
+	return status, string(out), nil
 }
