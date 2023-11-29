@@ -152,7 +152,7 @@ func parseFacl(content string) (*Facl, error) {
 		if after, found := strings.CutPrefix(line, "USER"); found {
 			splitted := strings.Fields(after)
 			if len(splitted) < 2 {
-				return nil, errors.New("Invalig ACL line format")
+				return nil, errors.New("Invalid ACL line format")
 			}
 
 			id, err := strconv.ParseInt(splitted[0], 10, 64)
@@ -173,7 +173,7 @@ func parseFacl(content string) (*Facl, error) {
 		if after, found := strings.CutPrefix(line, "GROUP"); found {
 			splitted := strings.Fields(after)
 			if len(splitted) < 2 {
-				return nil, errors.New("Invalig ACL line format")
+				return nil, errors.New("Invalid ACL line format")
 			}
 
 			id, err := strconv.ParseInt(splitted[0], 10, 64)
