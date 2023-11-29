@@ -215,21 +215,22 @@ func parseFacl(content string) (*Facl, error) {
 
 func Get(linuxCtx util.LinuxContext, file *LinuxFile) (*LinuxFile, *util.CommonError) {
 	errorhandler := func(out []byte, err error) (util.Status, *util.CommonError) {
-		switch err.Error() {
-		case "Process exited with status 1":
-			diagnostic := diag.NewErrorDiagnostic(
-				"Path not found",
-				"Please check path",
-			)
-			return util.Success, &util.CommonError{
-				Error: err,
-				Diagnostics: diag.Diagnostics{
-					diagnostic,
-				},
+		if err != nil {
+			switch err.Error() {
+			case "Process exited with status 1":
+				diagnostic := diag.NewErrorDiagnostic(
+					"Path not found",
+					"Please check path",
+				)
+				return util.Success, &util.CommonError{
+					Error: err,
+					Diagnostics: diag.Diagnostics{
+						diagnostic,
+					},
+				}
 			}
-		default:
-			return sshUtil.DefaultErrorHandler(out, err)
 		}
+		return util.Bottom, nil
 	}
 	stdout, commonError := sshUtil.RunCommand(linuxCtx, "getfacl -nt"+" "+file.Path, errorhandler)
 	if commonError != nil {

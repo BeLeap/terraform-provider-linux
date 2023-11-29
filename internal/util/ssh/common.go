@@ -8,17 +8,15 @@ import (
 )
 
 func DefaultErrorHandler(out []byte, err error) (util.Status, *util.CommonError) {
-	return util.Failed, &util.CommonError{
-		Error: err,
+	if err != nil {
+		return util.Failed, &util.CommonError{
+			Error: err,
+		}
 	}
+	return util.Success, nil
 }
 
 func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]byte, error) (util.Status, *util.CommonError)) (string, *util.CommonError) {
-	errorHandlerCoerced := errorhandler
-	if errorHandlerCoerced == nil {
-		errorHandlerCoerced = DefaultErrorHandler
-	}
-
 	tflog.Info(linuxCtx.Ctx, fmt.Sprintf("Running command \"%s\"", command))
 	var out []byte
 	errors := []*util.CommonError{}
@@ -26,14 +24,21 @@ func RunCommand(linuxCtx util.LinuxContext, command string, errorhandler func([]
 	fn := func() util.Status {
 		var err error
 		out, err = linuxCtx.ProviderData.SshClient.Run(command)
-		if err != nil {
-			status, err := errorHandlerCoerced(out, err)
-			if err != nil {
-				errors = append(errors, err)
-			}
-			return status
+
+		status := util.Bottom
+		var commonError *util.CommonError = nil
+
+		if errorhandler != nil {
+			status, commonError = errorhandler(out, err)
 		}
-		return util.Success
+		if status == util.Bottom {
+			status, commonError = errorhandler(out, err)
+		}
+
+		if commonError != nil {
+			errors = append(errors, commonError)
+		}
+		return status
 	}
 	_ = util.BackoffRetry(fn, 3)
 	if len(errors) != 0 {
