@@ -48,6 +48,7 @@ type Status int64
 const (
 	Success Status = 0
 	Failed  Status = 1
+	Bottom  Status = -1
 )
 
 func BackoffRetry(fn func() Status, retry int) Status {

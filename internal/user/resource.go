@@ -91,7 +91,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		command = command + " " + "--gid" + " " + fmt.Sprintf("%d", plan.Gid.ValueInt64())
 	}
 
-	_, commonError := sshUtil.RunCommand(linuxCtx, command, nil)
+	_, _, commonError := sshUtil.RunCommand(linuxCtx, command, nil)
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
@@ -183,7 +183,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		command = command + " " + "--gid" + " " + fmt.Sprintf("%d", plan.Gid.ValueInt64())
 	}
 
-	_, commonError := sshUtil.RunCommand(linuxCtx, command, nil)
+	_, _, commonError := sshUtil.RunCommand(linuxCtx, command, nil)
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
@@ -237,7 +237,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	}
 
 	command = command + " " + username
-	_, commonError := sshUtil.RunCommand(linuxCtx, command, nil)
+	_, _, commonError := sshUtil.RunCommand(linuxCtx, command, nil)
 	if commonError != nil {
 		resp.Diagnostics.Append(commonError.Diagnostics...)
 		return
