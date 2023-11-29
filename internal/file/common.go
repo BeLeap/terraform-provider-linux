@@ -193,6 +193,9 @@ func parseFacl(content string) (*Facl, error) {
 		}
 		if after, found := strings.CutPrefix(line, "other"); found {
 			splitted := strings.Fields(after)
+			if len(splitted) < 1 {
+				return nil, errors.New("Invalid ACL line format for \"other\"")
+			}
 
 			permission, err := parsePermissionString(splitted[0])
 			if err != nil {
