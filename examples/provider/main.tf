@@ -7,7 +7,15 @@ terraform {
 }
 
 provider "linux" {
-  host        = "node01.titanv.exp.riiid.cloud"
+  host        = "test-node.fox-deneb.ts.net"
   username    = "root"
   private_key = file("../../ssh-keys/id_rsa")
+}
+
+data "linux_user" "root" {
+  username = "root"
+}
+
+output "root" {
+  value = data.linux_user.root
 }
