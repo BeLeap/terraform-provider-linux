@@ -15,4 +15,4 @@ jobs:
       - name: "[SETUP] go"
         uses: "actions/setup-go@v4"
       - name: "[RUN] test"
-        run: go test
+        run: go test -v ./...
