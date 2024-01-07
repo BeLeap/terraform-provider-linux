@@ -8,7 +8,7 @@ import (
 )
 
 func GetLinuxContext(t *testing.T) LinuxContext {
-	auth, err := goph.Key("../../ssh-keys/id_rsa", "")
+	auth, err := goph.Key("../../ssh-keys/key", "")
 	if err != nil {
 		t.Fatalf("Failed to create auth info: %v", err)
 		t.FailNow()

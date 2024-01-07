@@ -12,6 +12,9 @@ jobs:
     steps:
       - name: "[SETUP] Checkout"
         uses: "actions/checkout@v4"
+      - name: "[SETUP] SSH Key"
+        run: |
+          echo "${{ secrets.SSH_KEY }}" > ssh-keys/key
       - name: "[SETUP] go"
         uses: "actions/setup-go@v4"
       - name: "[RUN] test"
