@@ -1,0 +1,29 @@
+package util
+
+import (
+	"context"
+	"testing"
+
+	"github.com/melbahja/goph"
+)
+
+func GetLinuxContext(t *testing.T) LinuxContext {
+	auth, err := goph.Key("../../ssh-keys/key", "")
+	if err != nil {
+		t.Fatalf("Failed to create auth info: %v", err)
+		t.FailNow()
+	}
+
+	sshClient, err := goph.NewUnknown("root", "test-node.fox-deneb.ts.net", auth)
+	if err != nil {
+		t.Fatalf("Failed to connect test node: %v", err)
+		t.FailNow()
+	}
+
+	return LinuxContext{
+		Ctx: context.Background(),
+		ProviderData: &LinuxProviderData{
+			SshClient: sshClient,
+		},
+	}
+}
