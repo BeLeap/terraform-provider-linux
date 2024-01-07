@@ -14,7 +14,7 @@ func GetLinuxContext(t *testing.T) LinuxContext {
 		t.FailNow()
 	}
 
-	sshClient, err := goph.New("root", "test-node.fox-deneb.ts.net", auth)
+	sshClient, err := goph.NewUnknown("root", "test-node.fox-deneb.ts.net", auth)
 	if err != nil {
 		t.Fatalf("Failed to connect test node: %v", err)
 		t.FailNow()
