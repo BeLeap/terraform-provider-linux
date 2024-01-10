@@ -14,7 +14,7 @@ func TestGet(t *testing.T) {
 		Gid:      0,
 	}
 
-	linuxContext := util.GetLinuxContext(t)
+	linuxContext := util.GetLinuxContextForTest(t)
 	username := "root"
 	user, err := Get(linuxContext, username)
 

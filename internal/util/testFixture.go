@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func GetLinuxContext(t *testing.T) LinuxContext {
+func GetLinuxContextForTest(t *testing.T) LinuxContext {
 	ctx := context.Background()
 	req := testcontainers.ContainerRequest{
 		Image:        "testcontainers/sshd:1.1.0",
