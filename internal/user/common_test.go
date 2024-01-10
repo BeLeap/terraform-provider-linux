@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"gotest.tools/assert"
+	is "gotest.tools/assert/cmp"
 )
 
 func TestGet(t *testing.T) {
@@ -23,4 +24,13 @@ func TestGet(t *testing.T) {
 	}
 
 	assert.DeepEqual(t, desired, user)
+}
+
+func TestGetInvalidUser(t *testing.T) {
+	linuxContext := util.GetLinuxContextForTest(t)
+	username := "user_not_exists"
+	user, err := Get(linuxContext, username)
+
+	assert.Assert(t, is.Nil(user))
+	assert.Assert(t, is.Nil(err))
 }
