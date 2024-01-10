@@ -3,7 +3,6 @@ package util
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/melbahja/goph"
 	"github.com/testcontainers/testcontainers-go"
@@ -17,7 +16,7 @@ func GetLinuxContextForTest(t *testing.T) LinuxContext {
 		Image:        "testcontainers/sshd:1.1.0",
 		ExposedPorts: []string{"22/tcp"},
 		Entrypoint:   []string{"sh", "-c", "echo 'PermitRootLogin yes'>> /etc/ssh/sshd_config && /usr/sbin/sshd && /usr/bin/tail -f /dev/null"},
-		WaitingFor:   wait.ForListeningPort("22/tcp").WithStartupTimeout(10 * time.Second),
+		WaitingFor:   wait.ForListeningPort("22/tcp"),
 	}
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
