@@ -7,9 +7,9 @@ terraform {
 }
 
 provider "linux" {
-  host        = "test-node.fox-deneb.ts.net"
-  username    = "root"
-  private_key = file("../../ssh-keys/id_rsa")
+  host     = "localhost"
+  username = "root"
+  password = "root"
 }
 
 data "linux_file" "test" {
