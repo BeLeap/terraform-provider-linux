@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"terraform-provider-linux/internal/file"
 	"terraform-provider-linux/internal/user"
 	"terraform-provider-linux/internal/util"
@@ -12,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/melbahja/goph"
+	"golang.org/x/crypto/ssh"
 )
 
 // Ensure ScaffoldingProvider satisfies various provider interfaces.
@@ -37,8 +38,10 @@ func (p *LinuxProvider) Metadata(_ context.Context, _ provider.MetadataRequest, 
 
 type LinuxProviderModel struct {
 	Host       types.String `tfsdk:"host"`
+	Port       types.Int64  `tfsdk:"port"`
 	Username   types.String `tfsdk:"username"`
 	PrivateKey types.String `tfsdk:"private_key"`
+	Password   types.String `tfsdk:"password"`
 }
 
 func (p *LinuxProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
@@ -47,11 +50,18 @@ func (p *LinuxProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp
 			"host": schema.StringAttribute{
 				Required: true,
 			},
+			"port": schema.Int64Attribute{
+				Optional: true,
+			},
 			"username": schema.StringAttribute{
 				Required: true,
 			},
 			"private_key": schema.StringAttribute{
-				Required:  true,
+				Optional:  true,
+				Sensitive: true,
+			},
+			"password": schema.StringAttribute{
+				Optional:  true,
 				Sensitive: true,
 			},
 		},
@@ -74,6 +84,14 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		)
 	}
 
+	if config.Port.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("port"),
+			"Port unknown",
+			"Port is unknown",
+		)
+	}
+
 	if config.Username.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("username"),
@@ -90,16 +108,30 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		)
 	}
 
+	if config.Password.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("password"),
+			"Password unknown",
+			"Password is unknown",
+		)
+	}
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	var host string
+	port := 22
 	var username string
 	var privateKey string
+	var password string
 
 	if !config.Host.IsNull() {
 		host = config.Host.ValueString()
+	}
+
+	if !config.Port.IsNull() {
+		port = int(config.Port.ValueInt64())
 	}
 
 	if !config.Username.IsNull() {
@@ -108,6 +140,10 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 
 	if !config.PrivateKey.IsNull() {
 		privateKey = config.PrivateKey.ValueString()
+	}
+
+	if !config.Password.IsNull() {
+		password = config.Password.ValueString()
 	}
 
 	if host == "" {
@@ -126,36 +162,47 @@ func (p *LinuxProvider) Configure(ctx context.Context, req provider.ConfigureReq
 		)
 	}
 
-	if privateKey == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("private_key"),
-			"Empty private_key",
-			"Please specify private key",
-		)
-	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	auth, err := goph.RawKey(privateKey, "")
+	authMethods := []ssh.AuthMethod{}
+	if privateKey != "" {
+		signer, err := ssh.ParsePrivateKey([]byte(privateKey))
+		if err != nil {
+			resp.Diagnostics.AddError("Failed to parse private key", err.Error())
+			return
+		}
+		authMethods = append(authMethods, ssh.PublicKeys(signer))
+	}
+	if password != "" {
+		authMethods = append(authMethods, ssh.Password(password))
+	}
+
+	if len(authMethods) == 0 {
+		resp.Diagnostics.AddError("Empty auth info", "Please specify either private key or password.")
+	}
+
+	sshClientConfig := &ssh.ClientConfig{
+		User:            username,
+		Auth:            authMethods,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", host, port), sshClientConfig)
 	if err != nil {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("private_key"),
-			"Failed to create auth info",
-			err.Error(),
-		)
+		resp.Diagnostics.AddError("Failed to connect", err.Error())
 		return
 	}
 
-	sshClient, err := goph.New(username, host, auth)
+	session, err := conn.NewSession()
 	if err != nil {
-		resp.Diagnostics.AddError("Failed to create client", err.Error())
+		resp.Diagnostics.AddError("Failed to create session", err.Error())
 		return
 	}
 
 	providerData := &util.LinuxProviderData{
-		SshClient: sshClient,
+		SshSession: session,
 	}
 	resp.DataSourceData = providerData
 	resp.ResourceData = providerData

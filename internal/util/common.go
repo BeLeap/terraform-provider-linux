@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/melbahja/goph"
+	"golang.org/x/crypto/ssh"
 )
 
 type MutlipleErrorContainer struct {
@@ -70,7 +70,7 @@ func BackoffRetry(fn func() Status, retry int) Status {
 }
 
 type LinuxProviderData struct {
-	SshClient *goph.Client
+	SshSession *ssh.Session
 }
 
 func ConvertProviderData(providerData any) (*LinuxProviderData, *CommonError) {

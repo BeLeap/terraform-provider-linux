@@ -2,9 +2,9 @@ package util
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
-	"github.com/melbahja/goph"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"golang.org/x/crypto/ssh"
@@ -39,24 +39,29 @@ func GetLinuxContextForTest(t *testing.T) LinuxContext {
 		t.FailNow()
 	}
 
-	auth := goph.Password("root")
-	sshClient, err := goph.NewConn(&goph.Config{
-		User:     "root",
-		Addr:     ip,
-		Port:     uint(mappedPort.Int()),
-		Auth:     auth,
-		Timeout:  goph.DefaultTimeout,
-		Callback: ssh.InsecureIgnoreHostKey(),
-	})
+	config := &ssh.ClientConfig{
+		User: "root",
+		Auth: []ssh.AuthMethod{
+			ssh.Password("root"),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", ip, mappedPort.Int()), config)
 	if err != nil {
 		t.Fatalf("Failed to connect test environment: %v", err)
+		t.FailNow()
+	}
+
+	session, err := conn.NewSession()
+	if err != nil {
+		t.Fatalf("Failed to create session for test environment: %v", err)
 		t.FailNow()
 	}
 
 	return LinuxContext{
 		Ctx: ctx,
 		ProviderData: &LinuxProviderData{
-			SshClient: sshClient,
+			SshSession: session,
 		},
 	}
 }
